@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+            border-radius: 16px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(227, 25, 55, 0.1);
+        }
+
+        .info-details {
+            flex: 1;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .btn-ambil {
+            background: #E31937;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(227, 25, 55, 0.3);
+        }
+
+        .btn-ambil:hover {
+            background: #be123c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(227, 25, 55, 0.4);
+        }
+
+        .btn-ambil:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        thead th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        tbody td {
+            padding: 18px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-hadir {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-izin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-sakit {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-pulang {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pulang:hover {
+            background: #059669;
+        }
+
+        .btn-pulang:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 80px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .info-card {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .btn-ambil {
+                width: 100%;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="navbar-logo">
+            <a href="/">
+                <img src="/img/logotelkom.png" alt="Infranexia Logo">
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <a href="/">Home</a>
+            <a href="/program">Program</a>
+            <a href="/persyaratan">Persyaratan</a>
+            <a href="/pendaftaran">Pendaftaran</a>
+            <a href="/faq">FAQ</a>
+        </div>
+        <% if (locals.user) { %>
+            <div class="user-menu">
+                <div class="user-menu-trigger">
+                    <div class="user-name-pill">
+                        <span>Halo, <%= user.nama_depan %></span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '+' + (user.nama_belakang || '') + '&size=40&background=E31937&color=fff&bold=true' %>"
+                        alt="Profile" class="user-avatar">
+                </div>
+                <div class="dropdown-menu">
+                    <a href="/profil" class="dropdown-item">Profil Saya</a>
+                    <% if (locals.pendaftaranStatus==='diterima' ) { %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                        <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                        <% } %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                </div>
+            </div>
+            <% } %>
+    </nav>
+
+    <div class="container">
+        <h1>Absensi</h1>
+
+        <!-- User Info Card -->
+        <div class="info-card">
+            <div class="info-details">
+                <div class="info-row">
+                    <span class="info-label">Nama</span>: <%= user.nama_depan %>
+                        <%= user.nama_belakang || '' %>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Perguruan Tinggi</span>: <%= user.institusi || '-' %>
+                </div>
+            </div>
+            <a href="/pemagang/absen/check-in" class="btn-ambil"
+                style="text-decoration: none; display: block; text-align: center;">
+                + Ambil Absensi
+            </a>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="table-container">
+            <% if (absensi && absensi.length> 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hari</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th>Divisi</th>
+                            <th>Jam Datang</th>
+                            <th>Jam Pulang</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% absensi.forEach(item=> { %>
+                            <% const hari=['Minggu', 'Senin' , 'Selasa' , 'Rabu' , 'Kamis' , 'Jumat' , 'Sabtu' ]; const
+                                tanggalObj=new Date(item.tanggal); const hariNama=hari[tanggalObj.getDay()]; const
+                                tanggalFormat=tanggalObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'long' ,
+                                year: 'numeric' }); %>
+                                <tr>
+                                    <td><strong>
+                                            <%= hariNama %>
+                                        </strong></td>
+                                    <td>
+                                        <%= tanggalFormat %>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<%= item.status %>">
+                                            <%= item.status==='hadir' ? 'Hadir' : item.status==='izin' ? 'Izin'
+                                                : 'Sakit' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <%= item.divisi || '-' %>
+                                    </td>
+                                    <td>
+                                        <%= item.jam_datang || '--:--:--' %>
+                                    </td>
+                                    <td>
+                                        <% const today=new Date().toISOString().split('T')[0]; %>
+                                            <% if (item.status==='hadir' && !item.jam_pulang && item.tanggal===today) {
+                                                %>
+                                                <a href="/pemagang/absen/check-out" class="btn-pulang"
+                                                    style="text-decoration: none; display: inline-block;">Absen
+                                                    Pulang</a>
+                                                <% } else { %>
+                                                    <%= item.jam_pulang || '--:--:--' %>
+                                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <%= item.keterangan || '--' %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M9 1v2h6V1h2v2h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2zm11 10H4v8h16v-8zm-2-6H6v2h12V5z">
+                            </path>
+                        </svg>
+                        <p style="font-size: 16px; margin: 0;">Belum ada data absensi</p>
+                    </div>
+                    <% } %>
+        </div>
+    </div>
+
+    <script>
+        // User menu dropdown toggle for mobile
+        const userMenu = document.querySelector('.user-menu');
+        if (userMenu) {
+            userMenu.addEventListener('click', function (e) {
+                if (window.innerWidth <= 768) {
+                    this.classList.toggle('active');
+                }
+            });
+        }
+
+        // Clock in function
+        async function ambilAbsensi() {
+            const btn = document.getElementById('btnAmbilAbsen');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+
+            try {
+                const response = await fetch('/pemagang/absen/clock-in', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    location.reload();
+                } else {
+                    showToast(data.message, 'warning');
+                    btn.disabled = false;
+                    btn.textContent = '+ Ambil Absensi';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan koneksi', 'error');
+                btn.disabled = false;
+                btn.textContent = '+ Ambil Absensi';
+            }
+        }
+
+        // Clock out function
+        async function absenPulang() {
+            if (!confirm('Apakah Anda yakin ingin absen pulang?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/pemagang/absen/clock-out', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    location.reload();
+                } else {
+                    showToast(data.message, 'warning');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan koneksi', 'error');
+            }
+        }
+    </script>
+</body>
+
+<%- include('../../partials/logout-modal') %>
+    <%- include('../../partials/toast-notification') %>
+
+</html>

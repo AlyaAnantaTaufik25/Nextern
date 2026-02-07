@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles (Copied from dashboard.ejs) */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #E31937 0%, #c41230 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            padding: 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-logo {
+            padding: 0 25px;
+            background: white;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px solid #E31937;
+            border-right: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-logo img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(1.1) contrast(1.1);
+        }
+
+        .sidebar-menu {
+            margin-top: 10px;
+        }
+
+        .menu-item {
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 400;
+            font-size: 1.15rem;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-item i {
+            margin-right: 25px;
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            height: 90px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 3px solid #E31937;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .header-greeting h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .header-greeting p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* User Menu */
+        .user-menu {
+            position: relative;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 50px;
+            background: #f5f5f7;
+            transition: all 0.3s ease;
+        }
+
+        .header-user:hover {
+            background: #ebebed;
+        }
+
+        .header-user img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid #E31937;
+            object-fit: cover;
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            background: #ffffff;
+            min-width: 220px;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            padding: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .user-menu:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 14px 18px;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #fff5f5;
+            color: #E31937;
+        }
+
+        .dropdown-item.logout {
+            color: #E31937;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+
+        /* Content Area for Profile */
+        .content {
+            padding: 30px 40px;
+        }
+
+        /* Profile Specific Styles */
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+        }
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            padding: 40px;
+            border-bottom: 1px solid #eee;
+            background: linear-gradient(to right, #fff, #fcfcfc);
+        }
+
+        .profile-photo-wrapper {
+            position: relative;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #E31937;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #E31937;
+            overflow: hidden;
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: all 0.2s;
+        }
+
+        .camera-btn:hover {
+            background: #E31937;
+        }
+
+        .camera-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .delete-photo-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 36px;
+            height: 36px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            transition: all 0.2s;
+            color: #E31937;
+        }
+
+        .delete-photo-btn:hover {
+            background: #fff5f5;
+            border-color: #E31937;
+            transform: scale(1.1);
+        }
+
+        .delete-photo-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .delete-photo-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 36px;
+            height: 36px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            transition: all 0.2s;
+            color: #E31937;
+        }
+
+        .delete-photo-btn:hover {
+            background: #fff5f5;
+            border-color: #E31937;
+            transform: scale(1.1);
+        }
+
+        .delete-photo-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .profile-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .profile-role {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #E31937;
+            color: white;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .data-section {
+            padding: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .btn-edit {
+            padding: 8px 16px;
+            border: 1px solid #E31937;
+            color: #E31937;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: #E31937;
+            color: white;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .data-item {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            border-left: 3px solid #E31937;
+        }
+
+        .data-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .data-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #E31937;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #E31937;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background: #c41230;
+        }
+
+        .btn-change-password {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+        }
+
+        .btn-change-password:hover {
+            background: #f5f5f5;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar-logo img {
+                height: 25px;
+            }
+
+            .menu-item span {
+                display: none;
+            }
+
+            .menu-item {
+                justify-content: center;
+                padding: 16px;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="/img/penuh_baru.jpg" alt="Infranexia Logo">
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                    <i class="bi bi-grid-fill"></i>
+                    Dashboard
+                </a>
+                <a href="/admin/pendaftaran"
+                    class="menu-item <%= (currentPage === 'pendaftaran' || currentPage === 'pendaftaran-detail') ? 'active' : '' %>">
+                    <i class="bi bi-file-earmark-person-fill"></i>
+                    Pendaftaran
+                </a>
+                <a href="/admin/users"
+                    class="menu-item <%= (currentPage === 'users' || currentPage === 'user-detail' || currentPage === 'user-absensi' || currentPage === 'user-logbook') ? 'active' : '' %>">
+                    <i class="bi bi-people-fill"></i>
+                    Kelola User
+                </a>
+                <a href="/admin/surat" class="menu-item <%= currentPage === 'surat' ? 'active' : '' %>">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    Daftar Surat
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-greeting">
+                    <h1>Profil Admin</h1>
+                    <p>Kelola data profil kamu disini</p>
+                </div>
+
+                <div class="user-menu">
+                    <div class="header-user">
+                        <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '&size=42&background=E31937&color=fff&bold=true' %>"
+                            alt="Admin">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                            height="16">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="/profil" class="dropdown-item">Profil Saya</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <% if (typeof success !=='undefined' && success) { %>
+                    <div class="alert alert-success">
+                        <%= success %>
+                    </div>
+                    <% } %>
+
+                        <% if (typeof error !=='undefined' && error) { %>
+                            <div class="alert alert-error">
+                                <%= error %>
+                            </div>
+                            <% } %>
+
+                                <div class="profile-card">
+                                    <div class="profile-top">
+                                        <div class="profile-photo-wrapper">
+                                            <div class="profile-photo">
+                                                <% if (user.foto_profil) { %>
+                                                    <img src="<%= user.foto_profil %>" alt="Profile Photo">
+                                                    <% } else { %>
+                                                        <%= user.nama_depan.charAt(0).toUpperCase() %>
+                                                            <% } %>
+                                            </div>
+                                            <label class="camera-btn" title="Ubah Foto">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 12.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+                                                </svg>
+                                                <input type="file" id="photoInput" accept="image/*"
+                                                    onchange="uploadPhoto(this)" style="display: none;">
+                                            </label>
+                                            <% if (user.foto_profil) { %>
+                                                <button class="delete-photo-btn" onclick="deletePhoto()"
+                                                    title="Hapus Foto">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path
+                                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                                <% } %>
+                                        </div>
+                                        <div class="profile-info">
+                                            <h1>
+                                                <%= user.nama_depan %>
+                                                    <%= user.nama_belakang || '' %>
+                                            </h1>
+                                            <span class="profile-role">Administrator</span>
+                                            <div style="margin-top: 15px;">
+                                                <button class="btn-change-password" onclick="openPasswordModal()">
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                                        <path
+                                                            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                                                    </svg>
+                                                    Ubah Password
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <h2 class="section-title">Informasi Pribadi</h2>
+                                            <button class="btn-edit" onclick="openEditModal()">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                                    <path
+                                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                                </svg>
+                                                Edit Profil
+                                            </button>
+                                        </div>
+                                        <div class="data-grid">
+                                            <div class="data-item">
+                                                <div class="data-label">Nama Lengkap</div>
+                                                <div class="data-value">
+                                                    <%= user.nama_depan %>
+                                                        <%= user.nama_belakang || '' %>
+                                                </div>
+                                            </div>
+                                            <div class="data-item">
+                                                <div class="data-label">Email</div>
+                                                <div class="data-value">
+                                                    <%= user.email %>
+                                                </div>
+                                            </div>
+                                            <div class="data-item">
+                                                <div class="data-label">Nomor Telepon</div>
+                                                <div class="data-value">
+                                                    <%= user.no_telepon || '-' %>
+                                                </div>
+                                            </div>
+                                            <div class="data-item">
+                                                <div class="data-label">Role</div>
+                                                <div class="data-value">
+                                                    <%= user.role %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Profil</h2>
+                <button class="btn-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form action="/profil/update" method="POST">
+                <div class="form-group">
+                    <label>Nama Depan</label>
+                    <input type="text" name="nama_depan" class="form-control" value="<%= user.nama_depan %>" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Belakang</label>
+                    <input type="text" name="nama_belakang" class="form-control"
+                        value="<%= user.nama_belakang || '' %>">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="<%= user.email %>" required>
+                </div>
+                <div class="form-group">
+                    <label>No. Telepon</label>
+                    <input type="tel" name="no_telepon" class="form-control" value="<%= user.no_telepon || '' %>">
+                </div>
+                <button type="submit" class="btn-submit">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ubah Password</h2>
+                <button class="btn-close" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <form action="/profil/change-password" method="POST">
+                <div class="form-group">
+                    <label>Password Lama</label>
+                    <input type="password" name="old_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Password Baru</label>
+                    <input type="password" name="new_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Konfirmasi Password Baru</label>
+                    <input type="password" name="confirm_password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn-submit">Ubah Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal() {
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function openPasswordModal() {
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function uploadPhoto(input) {
+            if (input.files && input.files[0]) {
+                const formData = new FormData();
+                formData.append('foto_profil', input.files[0]);
+
+                fetch('/profil/upload-photo', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Gagal mengupload foto', 'error');
+                    })
+                    .finally(() => {
+                        input.value = ''; // Reset input so same file can be selected again
+                    });
+            }
+        }
+
+        function deletePhoto() {
+            if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
+                fetch('/profil/delete-photo', {
+                    method: 'POST'
+                })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Gagal menghapus foto', 'error');
+                    });
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+
+<%- include('../partials/logout-modal') %>
+    <%- include('../partials/toast-notification') %>
+
+</html>

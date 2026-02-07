@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        h1.page-title {
+            text-align: center;
+            font-size: 42px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+        }
+
+        .form-card {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .btn-submit-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            background: #E31937;
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(227, 25, 55, 0.3);
+        }
+
+        .btn-submit:hover {
+            background: #be123c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(227, 25, 55, 0.4);
+        }
+
+        .btn-submit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .date-input-wrapper {
+            position: relative;
+        }
+
+        .date-input-wrapper i {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="navbar-logo">
+            <a href="/">
+                <img src="/img/logotelkom.png" alt="Infranexia Logo">
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <a href="/">Home</a>
+            <a href="/program">Program</a>
+            <a href="/persyaratan">Persyaratan</a>
+            <a href="/pendaftaran">Pendaftaran</a>
+            <a href="/faq">FAQ</a>
+        </div>
+        <% if (locals.user) { %>
+            <div class="user-menu">
+                <div class="user-menu-trigger">
+                    <div class="user-name-pill">
+                        <span>Halo, <%= user.nama_depan %></span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '+' + (user.nama_belakang || '') + '&size=40&background=E31937&color=fff&bold=true' %>"
+                        alt="Profile" class="user-avatar">
+                </div>
+                <div class="dropdown-menu">
+                    <a href="/profil" class="dropdown-item">Profil Saya</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                    <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                </div>
+            </div>
+            <% } %>
+    </nav>
+
+    <div class="container">
+        <h1 class="page-title">LogBook</h1>
+
+        <div class="form-card">
+            <form id="logbookForm">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" class="form-control" id="tanggal" name="tanggal"
+                            value="<%= entry ? entry.tanggal : new Date().toLocaleDateString('en-CA') %>" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="kegiatan">Kegiatan</label>
+                    <textarea class="form-control" id="kegiatan" name="kegiatan" placeholder="Masukkan Kegiatan"
+                        required><%= entry ? entry.kegiatan : '' %></textarea>
+                </div>
+
+                <div class="btn-submit-container">
+                    <button type="submit" class="btn-submit" id="btnSelesai">
+                        Selesai
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('logbookForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btnSelesai');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan...';
+
+            const formData = {
+                tanggal: document.getElementById('tanggal').value,
+                kegiatan: document.getElementById('kegiatan').value
+            };
+
+            const url = '<%= entry ? "/pemagang/logbook/edit/" + entry.id : "/pemagang/logbook/add" %>';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    window.location.href = '/pemagang/logbook';
+                } else {
+                    showToast(data.message, 'warning');
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan koneksi', 'error');
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+    </script>
+</body>
+
+<%- include('../../partials/logout-modal') %>
+    <%- include('../../partials/toast-notification') %>
+
+</html>

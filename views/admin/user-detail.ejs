@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #E31937 0%, #c41230 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            padding: 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-logo {
+            padding: 0 25px;
+            background: white;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px solid #E31937;
+            border-right: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-logo img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(1.1) contrast(1.1);
+        }
+
+        .sidebar-menu {
+            margin-top: 10px;
+        }
+
+        .menu-item {
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 400;
+            font-size: 1.15rem;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-item i {
+            margin-right: 25px;
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            height: 90px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 3px solid #E31937;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 50px;
+            background: #f5f5f7;
+            transition: all 0.3s ease;
+        }
+
+        .header-user:hover {
+            background: #ebebed;
+        }
+
+        .header-user img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid #E31937;
+            object-fit: cover;
+        }
+
+        .header-user svg {
+            width: 16px;
+            height: 16px;
+            color: #666;
+        }
+
+        /* User Menu Dropdown */
+        .user-menu {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background: white;
+            min-width: 200px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .user-menu:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f5f5f7;
+            color: #E31937;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 4px 0;
+        }
+
+        .dropdown-item.logout {
+            color: #E31937;
+        }
+
+        .dropdown-item.logout:hover {
+            background: #fff5f5;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 40px;
+            padding-bottom: 200px;
+            /* Space for dropdown */
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Detail Card */
+        .detail-card {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            /* max-width removed for full-width layout */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            margin-bottom: 50px;
+        }
+
+        .detail-header {
+            text-align: center;
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .detail-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .detail-body {
+            padding: 35px 40px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            width: 140px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        .form-value {
+            flex: 1;
+            padding: 14px 18px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .detail-footer {
+            padding: 25px 40px 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .btn-monitoring {
+            background: #3b82f6;
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn-monitoring:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-monitoring svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Monitoring Dropdown */
+        .monitoring-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .monitoring-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 10000;
+            min-width: 240px;
+            overflow: hidden;
+            animation: dropdownFade 0.2s ease-out;
+        }
+
+        @keyframes dropdownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .monitoring-menu.active {
+            display: block;
+        }
+
+        .monitoring-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .monitoring-item:last-child {
+            border-bottom: none;
+        }
+
+        .monitoring-item:hover {
+            background: #f8f9fa;
+            color: #3b82f6;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #E31937;
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .confirm-modal {
+            background: white;
+            border-radius: 16px;
+            text-align: center;
+            padding: 40px;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirm-modal h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .confirm-icon {
+            font-size: 60px;
+            color: #ef4444;
+            margin-bottom: 25px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-yes {
+            background: #ef4444;
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-yes:hover {
+            background: #dc2626;
+        }
+
+        .btn-back {
+            background: #9ca3af;
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: #6b7280;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .menu-item span {
+                display: none;
+            }
+
+            .menu-item {
+                justify-content: center;
+                padding: 16px;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-label {
+                margin-bottom: 8px;
+            }
+
+            .form-value {
+                width: 100%;
+            }
+
+            .detail-footer {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="/img/penuh_baru.jpg" alt="Infranexia Logo">
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                    <i class="bi bi-grid-fill"></i>
+                    Dashboard
+                </a>
+                <a href="/admin/pendaftaran"
+                    class="menu-item <%= (currentPage === 'pendaftaran' || currentPage === 'pendaftaran-detail') ? 'active' : '' %>">
+                    <i class="bi bi-file-earmark-person-fill"></i>
+                    Pendaftaran
+                </a>
+                <a href="/admin/users"
+                    class="menu-item <%= (currentPage === 'users' || currentPage === 'user-detail' || currentPage === 'user-absensi' || currentPage === 'user-logbook') ? 'active' : '' %>">
+                    <i class="bi bi-people-fill"></i>
+                    Kelola User
+                </a>
+                <a href="/admin/surat" class="menu-item <%= currentPage === 'surat' ? 'active' : '' %>">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    Daftar Surat
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 class="header-title">Kelola User</h1>
+                <div class="user-menu">
+                    <div class="header-user">
+                        <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '&size=42&background=E31937&color=fff&bold=true' %>"
+                            alt="Admin">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="/profil" class="dropdown-item">Profil Saya</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <div style="width: 100%;">
+                    <a href="/admin/users" class="back-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Kembali ke Daftar
+                    </a>
+
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <h2>Informasi User</h2>
+                        </div>
+                        <div class="detail-body">
+                            <div class="form-row">
+                                <span class="form-label">Nama</span>
+                                <span class="form-value">
+                                    <%= data.nama_depan %>
+                                        <%= data.nama_belakang || '' %>
+                                </span>
+                            </div>
+                            <div class="form-row">
+                                <span class="form-label">Email</span>
+                                <span class="form-value">
+                                    <%= data.email %>
+                                </span>
+                            </div>
+                            <div class="form-row">
+                                <span class="form-label">Instansi</span>
+                                <span class="form-value">
+                                    <%= data.institusi || '-' %>
+                                </span>
+                            </div>
+                            <div class="form-row">
+                                <span class="form-label">Bidang</span>
+                                <span class="form-value">
+                                    <%= data.bidang || '-' %>
+                                </span>
+                            </div>
+                            <div class="form-row">
+                                <span class="form-label">Jurusan</span>
+                                <span class="form-value">
+                                    <%= data.jurusan || '-' %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="detail-footer"
+                            style="display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
+                            <% if (data.pendaftaran_status==='diterima' || data.pendaftaran_status==='selesai' ) { %>
+                                <div class="monitoring-dropdown">
+                                    <button class="btn-monitoring" onclick="toggleMonitoringDropdown()">
+                                        Monitoring Aktifitas Magang
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                    <div class="monitoring-menu" id="monitoringMenu">
+                                        <a href="/admin/users/<%= data.id %>/absensi" class="monitoring-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                style="width: 18px; height: 18px; margin-right: 12px;">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            Absensi
+                                        </a>
+                                        <a href="/admin/users/<%= data.id %>/logbook" class="monitoring-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                style="width: 18px; height: 18px; margin-right: 12px;">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
+                                                </path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            </svg>
+                                            LogBook
+                                        </a>
+                                    </div>
+                                </div>
+                                <% } %>
+                                    <button class="btn-delete" onclick="showDeleteConfirm()">Hapus Akun</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="confirm-modal">
+            <h3>Hapus Akun?</h3>
+            <div class="confirm-icon">⚠️</div>
+            <p style="margin-bottom: 25px; color: #666;">Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak
+                dapat dibatalkan.</p>
+            <div class="confirm-buttons">
+                <button class="btn-yes" onclick="deleteUser()">HAPUS</button>
+                <button class="btn-back" onclick="closeDeleteModal()">BATAL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMonitoringDropdown() {
+            const menu = document.getElementById('monitoringMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            const dropdown = document.querySelector('.monitoring-dropdown');
+            const menu = document.getElementById('monitoringMenu');
+            if (dropdown && menu && !dropdown.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function showDeleteConfirm() {
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        async function deleteUser() {
+            try {
+                const response = await fetch('/admin/users/<%= data.id %>', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Akun berhasil dihapus', 'success');
+                    window.location.href = '/admin/users';
+                } else {
+                    showToast('Gagal menghapus akun: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan', 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+
+<%- include('../partials/logout-modal') %>
+    <%- include('../partials/toast-notification') %>
+
+</html>

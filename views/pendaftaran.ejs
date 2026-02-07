@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pendaftaran Magang Infranexia - PT Telkom Infrastruktur Indonesia">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #808080;
+            min-height: 100vh;
+        }
+
+        /* Page Title Header */
+        .page-header {
+            background: #808080;
+            padding: 20px 50px;
+            color: #fff;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        /* Main Container */
+        .main-container {
+            background: #fff;
+            min-height: 100vh;
+            padding-top: 70px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: #fff;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-logo img {
+            height: 40px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+        }
+
+        .navbar-menu a {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .navbar-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #E31937;
+            transition: width 0.3s ease;
+        }
+
+        .navbar-menu a:hover::after,
+        .navbar-menu a.active::after {
+            width: 100%;
+        }
+
+        .navbar-menu a:hover,
+        .navbar-menu a.active {
+            color: #E31937;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 40px 80px;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 15px;
+            padding: 50px 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Progress Stepper */
+        .stepper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 50px;
+            padding: 0 50px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #E31937;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-circle,
+        .step.completed .step-circle {
+            background: #E31937;
+            border-color: #E31937;
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .step.active .step-label,
+        .step.completed .step-label {
+            color: #E31937;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 3px;
+            background: #E31937;
+            margin: 0 -5px;
+            margin-bottom: 35px;
+            z-index: 1;
+        }
+
+        .step-line.inactive {
+            background: #e0e0e0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #E31937;
+            box-shadow: 0 0 0 3px rgba(227, 25, 55, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #aaa;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* File Upload */
+        .file-upload {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .file-upload-btn {
+            background: #f0f0f0;
+            padding: 14px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .file-upload-text {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            background: #E31937;
+            color: #fff;
+            border: none;
+            padding: 14px 50px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-top: 30px;
+        }
+
+        .btn-submit:hover {
+            background: #c41230;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(227, 25, 55, 0.3);
+        }
+
+        /* Verification State */
+        .verification-content {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .verification-icon {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+
+        .verification-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .verification-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .verification-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .verification-subtitle {
+            font-size: 16px;
+            color: #888;
+        }
+
+        /* Result State */
+        .result-content {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .result-subtitle {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .result-download-text {
+            font-size: 16px;
+            color: #E31937;
+            margin-bottom: 20px;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .result-info-link {
+            display: block;
+            margin-top: 40px;
+            color: #666;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .result-info-link:hover {
+            color: #E31937;
+        }
+
+        /* Modern Pill User Menu */
+        .user-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50px;
+            background: #f5f5f7;
+            transition: all 0.3s ease;
+        }
+
+        .user-menu-trigger:hover {
+            background: #ebebed;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .user-name-pill {
+            background: #E31937;
+            color: #ffffff !important;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-name-pill span {
+            color: #ffffff !important;
+        }
+
+        .user-name-pill svg {
+            width: 12px;
+            height: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .user-menu:hover .user-name-pill svg {
+            transform: rotate(180deg);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #E31937;
+            object-fit: cover;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            background: #ffffff;
+            min-width: 220px;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            padding: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .user-menu:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 14px 18px;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #fff5f5;
+            color: #E31937;
+        }
+
+        .dropdown-item.logout {
+            color: #E31937;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 20px;
+            }
+
+            .form-card {
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stepper {
+                padding: 0;
+            }
+
+            .step-circle {
+                width: 40px;
+                height: 40px;
+            }
+
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .navbar-menu {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="navbar-logo">
+                <a href="/">
+                    <img src="/img/logotelkom.png" alt="Infranexia Logo">
+                </a>
+            </div>
+            <div class="navbar-menu">
+                <a href="/#home">Home</a>
+                <a href="/#our-program">Program</a>
+                <a href="/#persyaratan">Persyaratan</a>
+                <a href="/pendaftaran"
+                    class="<%= typeof currentPage !== 'undefined' && currentPage === 'pendaftaran' ? 'active' : '' %>">Pendaftaran</a>
+                <a href="/faq"
+                    class="<%= typeof currentPage !== 'undefined' && currentPage === 'faq' ? 'active' : '' %>">FAQ</a>
+            </div>
+            <% if (locals.user) { %>
+                <div class="user-menu">
+                    <div class="user-menu-trigger">
+                        <div class="user-name-pill">
+                            <span>Halo, <%= user.nama_depan %></span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '+' + (user.nama_belakang || '') + '&size=40&background=E31937&color=fff&bold=true' %>"
+                            alt="Profile" class="user-avatar">
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="/profil" class="dropdown-item">Profil Saya</a>
+                        <% if (locals.pendaftaranStatus==='diterima' ) { %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                            <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                            <% } %>
+                                <div class="dropdown-divider"></div>
+                                <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                    </div>
+                </div>
+                <% } %>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="form-card">
+                <!-- Progress Stepper -->
+                <div class="stepper">
+                    <div class="step <%= status !== 'new' ? 'completed' : 'active' %>">
+                        <div class="step-circle"></div>
+                        <span class="step-label">Formulir</span>
+                    </div>
+                    <div class="step-line <%= status === 'new' || status === 'formulir' ? 'inactive' : '' %>"></div>
+                    <div
+                        class="step <%= status === 'verifikasi' || status === 'diterima' || status === 'ditolak' ? 'completed' : '' %>">
+                        <div class="step-circle"></div>
+                        <span class="step-label">Verifikasi</span>
+                    </div>
+                    <div class="step-line <%= status !== 'diterima' && status !== 'ditolak' ? 'inactive' : '' %>"></div>
+                    <div class="step <%= status === 'diterima' || status === 'ditolak' ? 'completed' : '' %>">
+                        <div class="step-circle"></div>
+                        <span class="step-label">Hasil</span>
+                    </div>
+                </div>
+
+                <% if (status==='new' || status==='formulir' ) { %>
+                    <form action="/pendaftaran" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="text" name="nama_lengkap" class="form-control" placeholder="Nama Lengkap"
+                                value="<%= user ? user.nama_depan + ' ' + (user.nama_belakang || '') : '' %>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" name="nim" class="form-control" placeholder="NIM / Student ID" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" name="instansi" class="form-control" placeholder="Instansi"
+                                value="<%= user ? user.institusi || '' : '' %>" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <select name="bidang" class="form-control" required>
+                                    <option value="" disabled selected>Bidang</option>
+                                    <option value="Teknik">Teknik</option>
+                                    <option value="Komputer">Komputer</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="jurusan" class="form-control" placeholder="Jurusan" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Durasi Magang</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="date" name="waktu_mulai" id="waktuMulai" class="form-control"
+                                        placeholder="Waktu Mulai" title="Waktu Mulai" required>
+                                    <small style="font-size: 11px; color: #888; margin-top: 4px; display: block;">Waktu
+                                        Mulai</small>
+                                </div>
+                                <div class="form-group">
+                                    <input type="date" name="waktu_selesai" id="waktuSelesai" class="form-control"
+                                        placeholder="Waktu Selesai" title="Waktu Selesai" required>
+                                    <small style="font-size: 11px; color: #888; margin-top: 4px; display: block;">Waktu
+                                        Selesai</small>
+                                </div>
+                            </div>
+                            <div id="durasiError"
+                                style="color: #E31937; background: #fff1f2; padding: 10px; border-radius: 8px; border: 1px solid #fee2e2; font-size: 13px; margin-top: 8px; display: none;">
+                                ⚠️ Minimal durasi magang adalah 1 bulan
+                            </div>
+                            <!-- Real-time Quota Warning -->
+                            <div id="quotaWarning"
+                                style="color: #E31937; background: #fff1f2; padding: 10px; border-radius: 8px; border: 1px solid #fee2e2; font-size: 13px; margin-top: 8px; display: none;">
+                                ⚠️ <b>Periode Penuh:</b> Silakan pilih tanggal lain yang masih tersedia.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Surat Pengantar</label>
+                            <div class="file-upload" onclick="document.getElementById('suratFile').click()">
+                                <div class="file-upload-btn">Pilih File</div>
+                                <div class="file-upload-text" id="fileName">Upload File</div>
+                                <input type="file" name="surat_pengantar" id="suratFile" class="file-input"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btnSubmit" class="btn-submit">Kirim</button>
+                    </form>
+
+                    <% } else if (status==='verifikasi' ) { %>
+                        <!-- Step 2: Verifikasi -->
+                        <div class="verification-content">
+                            <div class="verification-icon">
+                                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Background circles -->
+                                    <ellipse cx="100" cy="110" rx="80" ry="60" fill="#E8F4FD" />
+                                    <!-- Document stack -->
+                                    <rect x="40" y="40" width="100" height="130" rx="8" fill="#fff" stroke="#ddd"
+                                        stroke-width="2" />
+                                    <rect x="50" y="50" width="90" height="120" rx="6" fill="#fff" stroke="#E31937"
+                                        stroke-width="2" />
+                                    <!-- Document lines -->
+                                    <rect x="60" y="70" width="50" height="6" rx="3" fill="#E8E8E8" />
+                                    <rect x="60" y="85" width="70" height="4" rx="2" fill="#E8E8E8" />
+                                    <rect x="60" y="95" width="70" height="4" rx="2" fill="#E8E8E8" />
+                                    <rect x="60" y="105" width="50" height="4" rx="2" fill="#E8E8E8" />
+                                    <!-- Checklist icon -->
+                                    <rect x="60" y="120" width="15" height="15" rx="2" fill="#E31937" />
+                                    <path d="M64 127 L68 131 L72 124" stroke="white" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <rect x="80" y="124" width="40" height="4" rx="2" fill="#E8E8E8" />
+                                    <rect x="60" y="140" width="15" height="15" rx="2" fill="#E31937" />
+                                    <path d="M64 147 L68 151 L72 144" stroke="white" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <rect x="80" y="144" width="40" height="4" rx="2" fill="#E8E8E8" />
+                                    <!-- Image icon -->
+                                    <rect x="100" y="60" width="30" height="25" rx="3" fill="#4A90D9" />
+                                    <circle cx="108" cy="68" r="4" fill="#fff" />
+                                    <path d="M100 82 L110 74 L120 82 L130 72" stroke="#fff" stroke-width="2" />
+                                </svg>
+                            </div>
+                            <h2 class="verification-title">Formulir Anda sedang di proses</h2>
+                            <p class="verification-subtitle">Mohon menunggu informasi selanjutnya</p>
+                        </div>
+
+                        <% } else if (status==='diterima' ) { %>
+                            <!-- Step 3: Hasil Diterima -->
+                            <div class="result-content">
+                                <h2 class="result-title">Selamat!</h2>
+                                <p class="result-subtitle">Anda dinyatakan lulus seleksi program magang</p>
+
+                                <p class="result-download-text">Silakan unduh surat penerimaan</p>
+
+                                <a href="/pendaftaran/download-surat" class="btn-download">
+                                    Unduh
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                    </svg>
+                                </a>
+
+                                <a href="/program" class="result-info-link">Informasi lebih lanjut →</a>
+                            </div>
+
+                            <% } else if (status==='ditolak' ) { %>
+                                <!-- Step 3: Hasil Ditolak -->
+                                <div class="result-content">
+                                    <h2 class="result-title">Mohon maaf</h2>
+                                    <p class="result-subtitle">Anda dinyatakan tidak lulus seleksi program
+                                        magang</p>
+
+                                    <p class="result-download-text">Silakan unduh surat berikut</p>
+
+                                    <a href="/pendaftaran/download-surat" class="btn-download">
+                                        Unduh
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                        </svg>
+                                    </a>
+
+                                    <a href="/program" class="result-info-link">Informasi lebih lanjut →</a>
+                                </div>
+                                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File upload display
+        document.getElementById('suratFile')?.addEventListener('change', function (e) {
+            const fileName = e.target.files[0]?.name || 'Upload File';
+            document.getElementById('fileName').textContent = fileName;
+        });
+
+        const waktuMulai = document.getElementById('waktuMulai');
+        const waktuSelesai = document.getElementById('waktuSelesai');
+        const durasiError = document.getElementById('durasiError');
+        const quotaWarning = document.getElementById('quotaWarning');
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navbarMenu = document.querySelector('.navbar-menu');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function () {
+                navbarMenu.classList.toggle('active');
+            });
+        }
+
+        // User menu dropdown toggle for mobile
+        const userMenu = document.querySelector('.user-menu');
+        if (userMenu) {
+            userMenu.addEventListener('click', function (e) {
+                if (window.innerWidth <= 768) {
+                    this.classList.toggle('active');
+                }
+            });
+        }
+        const btnSubmit = document.getElementById('btnSubmit');
+        const form = document.querySelector('form[action="/pendaftaran"]');
+
+        async function validateQuota() {
+            if (waktuMulai.value && waktuSelesai.value) {
+                try {
+                    const response = await fetch('/pendaftaran/check-quota', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            waktu_mulai: waktuMulai.value,
+                            waktu_selesai: waktuSelesai.value
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (!data.available) {
+                        quotaWarning.style.display = 'block';
+                        btnSubmit.disabled = true;
+                        btnSubmit.style.opacity = '0.5';
+                        btnSubmit.style.cursor = 'not-allowed';
+                        return false;
+                    } else {
+                        quotaWarning.style.display = 'none';
+                        // Only re-enable if duration is also valid
+                        if (validateDuration()) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.style.opacity = '1';
+                            btnSubmit.style.cursor = 'pointer';
+                        }
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Error checking quota:', error);
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        function countWorkingDays(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            let count = 0;
+            const current = new Date(start);
+
+            while (current <= end) {
+                const day = current.getDay();
+                if (day !== 0 && day !== 6) { // Not Sunday (0) and not Saturday (6)
+                    count++;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            return count;
+        }
+
+        function validateDuration() {
+            if (waktuMulai && waktuSelesai && waktuMulai.value && waktuSelesai.value) {
+                const workingDays = countWorkingDays(waktuMulai.value, waktuSelesai.value);
+
+                if (workingDays < 30) {
+                    durasiError.innerHTML = `⚠️ Minimal durasi magang adalah 1 bulan (30 hari kerja).<br><small>Anda baru memilih ${workingDays} hari kerja (Sabtu & Minggu tidak dihitung).</small>`;
+                    durasiError.style.display = 'block';
+                    btnSubmit.disabled = true;
+                    btnSubmit.style.opacity = '0.5';
+                    btnSubmit.style.cursor = 'not-allowed';
+                    return false;
+                } else {
+                    durasiError.style.display = 'none';
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        if (waktuMulai) {
+            waktuMulai.addEventListener('change', async () => {
+                validateDuration();
+                await validateQuota();
+            });
+        }
+        if (waktuSelesai) {
+            waktuSelesai.addEventListener('change', async () => {
+                validateDuration();
+                await validateQuota();
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', async function (e) {
+                const isDurationValid = validateDuration();
+                const isQuotaValid = await validateQuota();
+
+                if (!isDurationValid || !isQuotaValid) {
+                    e.preventDefault();
+                    if (!isDurationValid) showToast('Minimal durasi magang adalah 1 bulan', 'warning');
+                    else showToast('Periode Penuh: Silakan pilih tanggal lain yang masih tersedia.', 'warning');
+                }
+            });
+        }
+    </script>
+</body>
+
+<%- include('partials/logout-modal') %>
+    <%- include('partials/toast-notification') %>
+
+</html>

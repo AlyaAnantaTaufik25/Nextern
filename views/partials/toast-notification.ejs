@@ -1,0 +1,190 @@
+<!-- Toast Notification Container -->
+<style>
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 380px;
+        width: calc(100% - 40px);
+    }
+
+    .toast-container .toast {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .toast-container .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .toast-container .toast-icon {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        flex-shrink: 0;
+    }
+
+    .toast-container .toast-icon svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+    }
+
+    .toast-container .toast-message {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1a1a;
+        line-height: 1.4;
+    }
+
+    .toast-container .toast-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+
+    .toast-container .toast-close:hover {
+        opacity: 1;
+    }
+
+    .toast-container .toast-close svg {
+        width: 16px;
+        height: 16px;
+        stroke: #666;
+        display: block;
+    }
+
+    .toast-container .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        animation: toastProgress 4s linear forwards;
+    }
+
+    @keyframes toastProgress {
+        from {
+            width: 100%;
+        }
+
+        to {
+            width: 0;
+        }
+    }
+
+    .toast-container .toast-success {
+        border-left: 4px solid #10b981;
+    }
+
+    .toast-container .toast-success .toast-icon svg {
+        stroke: #10b981;
+    }
+
+    .toast-container .toast-success .toast-progress {
+        background: #10b981;
+    }
+
+    .toast-container .toast-warning {
+        border-left: 4px solid #f59e0b;
+    }
+
+    .toast-container .toast-warning .toast-icon svg {
+        stroke: #f59e0b;
+    }
+
+    .toast-container .toast-warning .toast-progress {
+        background: #f59e0b;
+    }
+
+    .toast-container .toast-error {
+        border-left: 4px solid #ef4444;
+    }
+
+    .toast-container .toast-error .toast-icon svg {
+        stroke: #ef4444;
+    }
+
+    .toast-container .toast-error .toast-progress {
+        background: #ef4444;
+    }
+
+    .toast-container .toast-info {
+        border-left: 4px solid #3b82f6;
+    }
+
+    .toast-container .toast-info .toast-icon svg {
+        stroke: #3b82f6;
+    }
+
+    .toast-container .toast-info .toast-progress {
+        background: #3b82f6;
+    }
+</style>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+
+        // Determine icon based on type
+        let icon = '';
+        switch (type) {
+            case 'success':
+                icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+                break;
+            case 'warning':
+                icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+                break;
+            case 'error':
+                icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+                break;
+            default:
+                icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+        }
+
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-message">${message}</div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="toast-progress"></div>
+        `;
+
+        container.appendChild(toast);
+
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+</script>

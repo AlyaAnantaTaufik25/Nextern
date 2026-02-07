@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* FAQ Specific Styles */
+        .faq-hero {
+            background: #fff;
+            padding: 150px 50px 60px;
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid #eee;
+        }
+
+        .faq-badge {
+            display: inline-block;
+            background: rgba(227, 25, 55, 0.1);
+            color: #E31937;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .faq-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .faq-title span {
+            position: relative;
+            color: #E31937;
+        }
+
+        .faq-title span::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        .faq-subtitle {
+            font-size: 16px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .faq-container {
+            max-width: 1000px;
+            margin: 40px auto 80px;
+            padding: 0 20px;
+        }
+
+        .search-box {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            margin: -30px auto 40px;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 20;
+        }
+
+        .search-box svg {
+            width: 24px;
+            height: 24px;
+            fill: #888;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+
+        .search-box input::placeholder {
+            color: #aaa;
+        }
+
+        .faq-section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: linear-gradient(135deg, #E31937 0%, #ff4d6a 100%);
+            border-radius: 2px;
+        }
+
+        .faq-item {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-question {
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            user-select: none;
+        }
+
+        .faq-question h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            flex: 1;
+        }
+
+        .faq-icon {
+            width: 32px;
+            height: 32px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: #333;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            background: #E31937;
+        }
+
+        .faq-item.active .faq-icon svg {
+            fill: #fff;
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-answer-content {
+            padding: 0 25px 20px;
+            color: #666;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .no-results svg {
+            width: 80px;
+            height: 80px;
+            fill: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .no-results h3 {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .no-results p {
+            color: #999;
+        }
+
+        .contact-cta {
+            background: linear-gradient(135deg, #E31937 0%, #ff4d6a 100%);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            color: #fff;
+            margin-top: 60px;
+        }
+
+        .contact-cta h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .contact-cta p {
+            font-size: 16px;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .btn-contact {
+            display: inline-block;
+            background: #fff;
+            color: #E31937;
+            padding: 14px 35px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-contact:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .faq-hero {
+                padding: 100px 20px 60px;
+            }
+
+            .faq-title {
+                font-size: 32px;
+            }
+
+            .faq-container {
+                padding: 0 15px;
+            }
+
+            .section-title {
+                font-size: 20px;
+            }
+
+            .contact-cta {
+                padding: 30px 20px;
+            }
+
+            .contact-cta h2 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="navbar-logo">
+            <a href="/">
+                <img src="/img/logotelkom.png" alt="Infranexia Logo">
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <a href="/#home">Home</a>
+            <a href="/#our-program">Program</a>
+            <a href="/#persyaratan">Persyaratan</a>
+            <a href="/pendaftaran"
+                class="<%= typeof currentPage !== 'undefined' && currentPage === 'pendaftaran' ? 'active' : '' %>">Pendaftaran</a>
+            <a href="/faq"
+                class="<%= typeof currentPage !== 'undefined' && currentPage === 'faq' ? 'active' : '' %>">FAQ</a>
+        </div>
+        <% if (locals.isAuthenticated) { %>
+            <div class="user-menu">
+                <div class="user-menu-trigger">
+                    <div class="user-name-pill">
+                        <span>Halo, <%= user.nama_depan %></span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '+' + (user.nama_belakang || '') + '&size=40&background=E31937&color=fff&bold=true' %>"
+                        alt="Profile" class="user-avatar">
+                </div>
+                <div class="dropdown-menu">
+                    <a href="/profil" class="dropdown-item">Profil Saya</a>
+                    <% if (locals.pendaftaranStatus==='diterima' ) { %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                        <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                        <% } %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                </div>
+            </div>
+            <% } else { %>
+                <a href="/auth/login?mode=register" class="btn-daftar">Daftar</a>
+                <% } %>
+                    <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <span style="background: #333;"></span>
+                        <span style="background: #333;"></span>
+                        <span style="background: #333;"></span>
+                    </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="faq-hero">
+        <div class="faq-badge">FAQs</div>
+        <h1 class="faq-title">Frequently Asked <span>Questions</span></h1>
+        <p class="faq-subtitle">Temukan jawaban untuk pertanyaan umum seputar program magang NEXtern di Telkom
+            Indonesia
+        </p>
+    </section>
+
+    <!-- FAQ Container -->
+    <div class="faq-container">
+        <!-- Search Box -->
+        <div class="search-box">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <input type="text" id="searchInput" placeholder="Cari pertanyaan...">
+        </div>
+
+        <!-- Pendaftaran Section -->
+        <div class="faq-section">
+            <h2 class="section-title">Pendaftaran & Persyaratan</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apa itu program magang NEXtern?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        NEXtern adalah program magang yang diselenggarakan oleh Telkom Indonesia untuk memberikan
+                        kesempatan kepada mahasiswa dan fresh graduate untuk mendapatkan pengalaman kerja di
+                        industri
+                        telekomunikasi dan teknologi. Program ini dirancang untuk mengembangkan keterampilan
+                        profesional
+                        dan memberikan exposure terhadap proyek-proyek nyata.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Siapa saja yang bisa mendaftar program magang NEXtern?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Program NEXtern terbuka untuk mahasiswa aktif minimal semester 5 dan fresh graduate dari
+                        berbagai jurusan. Peserta harus memiliki IPK minimal 3.00, memiliki motivasi tinggi untuk
+                        belajar, dan mampu bekerja dalam tim. Tidak ada batasan usia selama masih memenuhi kriteria
+                        sebagai mahasiswa atau fresh graduate.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Bagaimana cara mendaftar program magang NEXtern?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Pendaftaran dilakukan secara online melalui website resmi NEXtern. Anda perlu membuat akun
+                        terlebih dahulu, kemudian mengisi formulir pendaftaran dengan melengkapi data diri,
+                        informasi
+                        pendidikan, dan mengunggah surat pengantar dari institusi. Setelah submit, Anda akan
+                        mendapatkan
+                        konfirmasi dan menunggu proses verifikasi dari tim kami.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Dokumen apa saja yang diperlukan untuk mendaftar?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Dokumen yang diperlukan meliputi: Surat Pengantar dari kampus/institusi, CV terbaru,
+                        Transkrip
+                        Nilai (untuk mahasiswa), Kartu Tanda Mahasiswa atau Ijazah (untuk fresh graduate), dan Foto
+                        formal. Pastikan semua dokumen dalam format PDF atau JPG dengan ukuran maksimal 2MB per
+                        file.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Durasi & Jadwal Section -->
+        <div class="faq-section">
+            <h2 class="section-title">Durasi & Jadwal</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Berapa lama durasi program magang NEXtern?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Durasi program magang minimal 1 bulan dan maksimal 6 bulan, disesuaikan dengan kebutuhan
+                        peserta
+                        dan ketersediaan posisi. Durasi dapat didiskusikan saat proses interview dan disesuaikan
+                        dengan
+                        kurikulum kampus atau kebutuhan pengalaman kerja Anda.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Kapan periode pendaftaran dibuka?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Pendaftaran program NEXtern dibuka sepanjang tahun dengan kuota terbatas per periode. Kami
+                        membuka batch baru setiap 3 bulan sekali. Informasi pembukaan pendaftaran akan diumumkan
+                        melalui
+                        website resmi dan media sosial Telkom Indonesia.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apakah bisa mengajukan perpanjangan magang?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Ya, perpanjangan magang dapat diajukan maksimal 1 bulan sebelum masa magang berakhir.
+                        Perpanjangan akan dipertimbangkan berdasarkan performa selama magang, ketersediaan posisi,
+                        dan
+                        kebutuhan proyek. Peserta perlu mengajukan surat perpanjangan dan mendapat persetujuan dari
+                        supervisor.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proses Seleksi Section -->
+        <div class="faq-section">
+            <h2 class="section-title">Proses Seleksi</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Bagaimana proses seleksi program magang NEXtern?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Proses seleksi terdiri dari 3 tahap: (1) Verifikasi dokumen dan administrasi, (2) Interview
+                        dengan HR dan supervisor divisi, (3) Pengumuman hasil seleksi. Seluruh proses memakan waktu
+                        sekitar 2-3 minggu. Peserta yang lolos akan dihubungi melalui email dan dapat mengunduh
+                        surat
+                        penerimaan melalui dashboard.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Berapa lama waktu tunggu hasil seleksi?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Hasil seleksi akan diumumkan maksimal 2 minggu setelah proses interview selesai. Anda dapat
+                        memantau status pendaftaran melalui dashboard akun NEXtern. Jika diterima, Anda akan
+                        menerima
+                        email notifikasi dan dapat mengunduh surat penerimaan resmi.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apakah ada tes atau assessment dalam proses seleksi?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Untuk posisi tertentu, mungkin ada technical test atau case study yang perlu diselesaikan.
+                        Hal
+                        ini akan diinformasikan saat proses interview. Umumnya, fokus seleksi adalah pada interview
+                        untuk menilai motivasi, keterampilan komunikasi, dan kesesuaian dengan budaya perusahaan.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fasilitas & Benefit Section -->
+        <div class="faq-section">
+            <h2 class="section-title">Fasilitas & Benefit</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apakah peserta magang mendapatkan uang saku?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Ya, peserta magang NEXtern akan mendapatkan uang saku bulanan yang kompetitif. Besaran uang
+                        saku
+                        disesuaikan dengan durasi magang dan divisi penempatan. Selain itu, peserta juga mendapatkan
+                        fasilitas makan siang dan akses ke berbagai fasilitas perusahaan.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Fasilitas apa saja yang didapatkan selama magang?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Peserta mendapatkan berbagai fasilitas termasuk: workspace dan peralatan kerja, akses
+                        internet
+                        dan sistem perusahaan, makan siang, asuransi kesehatan selama magang, akses ke learning
+                        resources dan training, serta kesempatan networking dengan profesional di Telkom Indonesia.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apakah mendapatkan sertifikat setelah selesai magang?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Ya, setiap peserta yang menyelesaikan program magang akan mendapatkan sertifikat resmi dari
+                        Telkom Indonesia. Sertifikat ini dapat digunakan sebagai bukti pengalaman kerja dan
+                        melengkapi
+                        portfolio profesional Anda. Sertifikat akan diberikan setelah evaluasi akhir dan
+                        penyelesaian
+                        seluruh kewajiban magang.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lainnya Section -->
+        <div class="faq-section">
+            <h2 class="section-title">Lainnya</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apakah ada kesempatan untuk direkrut setelah magang?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Peserta magang yang menunjukkan performa excellent dan sesuai dengan kebutuhan perusahaan
+                        memiliki kesempatan untuk dipertimbangkan dalam rekrutmen karyawan tetap. Namun, hal ini
+                        tergantung pada ketersediaan posisi dan kebijakan perusahaan saat itu.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Apakah bisa memilih divisi atau bidang tertentu?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Saat mendaftar, Anda dapat memilih bidang yang diminati seperti IT, Marketing, Finance, HR,
+                        atau
+                        Operations. Penempatan akan disesuaikan dengan minat, latar belakang pendidikan, dan
+                        ketersediaan posisi. Tim HR akan mendiskusikan penempatan yang paling sesuai saat interview.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Bagaimana jika saya memiliki pertanyaan lain?</h3>
+                    <div class="faq-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Jika Anda memiliki pertanyaan yang belum terjawab di FAQ ini, silakan hubungi tim kami
+                        melalui
+                        email nextern@telkom.co.id atau melalui form kontak di website. Tim kami akan dengan senang
+                        hati
+                        membantu menjawab pertanyaan Anda.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Message (Hidden by default) -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <h3>Tidak ada hasil ditemukan</h3>
+            <p>Coba gunakan kata kunci yang berbeda</p>
+        </div>
+
+        <!-- Contact CTA -->
+        <div class="contact-cta">
+            <h2>Masih ada pertanyaan?</h2>
+            <p>Tim kami siap membantu Anda. Jangan ragu untuk menghubungi kami!</p>
+            <a href="mailto:nextern@telkom.co.id" class="btn-contact">Hubungi Kami</a>
+        </div>
+    </div>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                const isActive = item.classList.contains('active');
+
+                // Close all items
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+
+                // Open clicked item if it wasn't active
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Search Functionality
+        const searchInput = document.getElementById('searchInput');
+        const faqItems = document.querySelectorAll('.faq-item');
+        const faqSections = document.querySelectorAll('.faq-section');
+        const noResults = document.getElementById('noResults');
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            let hasResults = false;
+
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question h3').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer-content').textContent.toLowerCase();
+
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Show/hide sections based on visible items
+            faqSections.forEach(section => {
+                const visibleItems = section.querySelectorAll('.faq-item[style="display: block;"]');
+                section.style.display = visibleItems.length > 0 ? 'block' : 'none';
+            });
+
+            // Show/hide no results message
+            noResults.style.display = hasResults ? 'none' : 'block';
+        });
+    </script>
+</body>
+
+<%- include('partials/logout-modal') %>
+    <%- include('partials/toast-notification') %>
+
+</html>

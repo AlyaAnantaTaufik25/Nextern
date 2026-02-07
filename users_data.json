@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "nama_depan": "Alya",
+    "status": "diterima"
+  },
+  {
+    "id": 4,
+    "nama_depan": "Alya",
+    "status": "diterima"
+  },
+  {
+    "id": 5,
+    "nama_depan": "Alya",
+    "status": "diterima"
+  },
+  {
+    "id": 9,
+    "nama_depan": "Budi",
+    "status": "verifikasi"
+  },
+  {
+    "id": 2,
+    "nama_depan": "Alya",
+    "status": null
+  },
+  {
+    "id": 6,
+    "nama_depan": "Alya",
+    "status": null
+  },
+  {
+    "id": 7,
+    "nama_depan": "nurul",
+    "status": null
+  }
+]

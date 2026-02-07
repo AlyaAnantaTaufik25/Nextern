@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Infranexia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: #808080;
+            overflow: hidden;
+            padding-top: 70px;
+        }
+
+        .navbar {
+            background: #fff !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-menu a {
+            color: #333 !important;
+        }
+
+        .navbar-menu a.active {
+            color: #E31937 !important;
+        }
+
+
+
+        .auth-container {
+            width: 100%;
+            height: calc(100vh - 70px);
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Forms Container */
+        .forms-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        /* Sign In & Sign Up Forms */
+        .signin-signup {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 60px;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .sign-in-form {
+            left: 0;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sign-up-form {
+            right: 0;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Active states */
+        .auth-container.sign-up-mode .sign-in-form {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .auth-container.sign-up-mode .sign-up-form {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Logo - Top Left Corner of Page */
+
+
+        /* Form Content - Centered */
+        .form-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 40px;
+        }
+
+        /* Form Title */
+        .form-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        /* Social Icons */
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .social-icon:hover {
+            border-color: #E31937;
+            background: #fff5f5;
+        }
+
+        /* Divider Text */
+        .divider-text {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        /* Form Fields Container */
+        .form-fields {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        /* Form Inputs - Box style */
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #E31937;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(227, 25, 55, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: #aaa;
+        }
+
+        /* Submit Button - At bottom */
+        .btn-submit {
+            padding: 14px 50px;
+            background: #E31937;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-submit:hover {
+            background: #c41230;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(227, 25, 55, 0.3);
+        }
+
+        /* Red Sliding Panel - Full at top, rounded at bottom */
+        .panel-overlay {
+            position: absolute;
+            width: calc(50% - 20px);
+            height: calc(100% - 40px);
+            background: #E31937;
+            right: 10px;
+            top: 0;
+            border-radius: 0 0 20px 20px;
+            transition: all 0.6s ease-in-out;
+            z-index: 5;
+        }
+
+        .auth-container.sign-up-mode .panel-overlay {
+            left: 10px;
+            right: auto;
+        }
+
+        /* Panels Container */
+        .panels-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .panel {
+            position: absolute;
+            width: calc(50% - 20px);
+            height: calc(100% - 40px);
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        /* Panel Content */
+        .left-panel {
+            left: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s ease-in-out;
+            z-index: 20;
+        }
+
+        .right-panel {
+            right: 10px;
+            opacity: 1;
+            visibility: visible;
+            transition: all 0.6s ease-in-out;
+            z-index: 20;
+        }
+
+        .auth-container.sign-up-mode .left-panel {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .auth-container.sign-up-mode .right-panel {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Panel Logo - Top Left of Panel */
+        .panel-logo {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+        }
+
+        .panel-logo img {
+            height: 40px;
+        }
+
+        /* Panel Text */
+        .panel h3 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            font-style: italic;
+        }
+
+        .panel p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+        }
+
+        /* Panel Button */
+        .btn-transparent {
+            padding: 12px 40px;
+            background: transparent;
+            border: 2px solid #fff;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-transparent:hover {
+            background: #fff;
+            color: #E31937;
+        }
+
+        /* Form Row for registration */
+        .form-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .form-row .input-field {
+            flex: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .page-title {
+                display: none;
+            }
+
+            .auth-container {
+                flex-direction: column;
+            }
+
+            .signin-signup {
+                width: 100%;
+                padding: 30px;
+                position: relative;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .form-logo {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 20px;
+            }
+
+            .form-content {
+                padding-top: 0;
+            }
+
+            .sign-up-form {
+                display: none;
+            }
+
+            .auth-container.sign-up-mode .sign-in-form {
+                display: none;
+            }
+
+            .auth-container.sign-up-mode .sign-up-form {
+                display: flex;
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .panels-container {
+                display: none;
+            }
+
+            .panel-overlay {
+                display: none;
+            }
+
+            .form-fields {
+                max-width: 100%;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .mobile-toggle a {
+                color: #E31937;
+                font-weight: 600;
+            }
+        }
+
+        @media (min-width: 901px) {
+            .mobile-toggle {
+                display: none;
+            }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 320px;
+        }
+
+        .alert-error {
+            background: #ffe6e6;
+            color: #c41230;
+            border: 1px solid #ffcccc;
+        }
+
+        .alert-success {
+            background: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #ccffcc;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="navbar-logo">
+            <a href="/">
+                <img src="/img/logotelkom.png" alt="Infranexia Logo">
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <a href="/#home">Home</a>
+            <a href="/#our-program">Program</a>
+            <a href="/#persyaratan">Persyaratan</a>
+            <a href="/pendaftaran">Pendaftaran</a>
+            <a href="/faq">FAQ</a>
+        </div>
+        <% if (typeof isAuthenticated !=='undefined' && isAuthenticated) { %>
+            <div class="user-menu">
+                <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <span class="user-name">Halo, <%= user.nama_depan %></span>
+                    <svg width="12" height="8" viewBox="0 0 12 8" fill="currentColor"
+                        style="color: #666; transition: transform 0.3s ease;">
+                        <path d="M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z" />
+                    </svg>
+                    <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '+' + (user.nama_belakang || '') + '&size=40&background=E31937&color=fff&bold=true' %>"
+                        alt="Profile"
+                        style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E31937; object-fit: cover;">
+                </div>
+                <div class="dropdown-menu">
+                    <a href="/profil" class="dropdown-item">Profil Saya</a>
+                    <% if (locals.pendaftaranStatus==='diterima' ) { %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                        <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                        <% } %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                </div>
+            </div>
+            <% } else { %>
+                <a href="/auth/login?mode=register" class="btn-daftar">Daftar</a>
+                <% } %>
+                    <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <span style="background: #333;"></span>
+                        <span style="background: #333;"></span>
+                        <span style="background: #333;"></span>
+                    </div>
+    </nav>
+
+    <div class="auth-container" id="authContainer">
+        <!-- Forms Container -->
+        <div class="forms-container">
+            <!-- Sign In Form -->
+            <form action="/auth/login" method="POST" class="signin-signup sign-in-form">
+
+                <div class="form-content">
+                    <h2 class="form-title">Sign In</h2>
+
+                    <div class="social-icons">
+                        <a href="/auth/google" class="social-icon" title="Sign in with Google">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                        </a>
+                        <a href="/auth/apple" class="social-icon" title="Sign in with Apple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
+                                <path
+                                    d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                            </svg>
+                        </a>
+                        <a href="/auth/facebook" class="social-icon" title="Sign in with Facebook">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#1877F2">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <p class="divider-text">Sign In With Email & Password</p>
+
+                    <% if (typeof error !=='undefined' && error) { %>
+                        <div class="alert alert-error">
+                            <%= error %>
+                        </div>
+                        <% } %>
+
+                            <% if (typeof success !=='undefined' && success) { %>
+                                <div class="alert alert-success">
+                                    <%= success %>
+                                </div>
+                                <% } %>
+
+                                    <div class="form-fields">
+                                        <input type="email" name="email" class="input-field" placeholder="Email"
+                                            required>
+                                        <input type="password" name="password" class="input-field"
+                                            placeholder="Password" required>
+
+                                        <button type="submit" class="btn-submit">Sign In</button>
+                                    </div>
+
+                                    <div class="mobile-toggle">
+                                        <p>Belum punya akun? <a href="#" onclick="toggleMode()">Sign Up</a></p>
+                                    </div>
+                </div>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form action="/auth/register" method="POST" class="signin-signup sign-up-form">
+
+                <div class="form-content">
+                    <h2 class="form-title">Create Account</h2>
+
+                    <div class="social-icons">
+                        <a href="/auth/google" class="social-icon" title="Register with Google">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                        </a>
+                        <a href="/auth/apple" class="social-icon" title="Register with Apple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
+                                <path
+                                    d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                            </svg>
+                        </a>
+                        <a href="/auth/facebook" class="social-icon" title="Register with Facebook">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#1877F2">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <p class="divider-text">Register with email</p>
+
+                    <div class="form-fields">
+                        <div class="form-row">
+                            <input type="text" name="nama_depan" class="input-field" placeholder="Nama Depan" required>
+                            <input type="text" name="nama_belakang" class="input-field" placeholder="Nama Belakang"
+                                required>
+                        </div>
+                        <input type="email" name="email" class="input-field" placeholder="Email" required>
+                        <input type="tel" name="no_telepon" class="input-field" placeholder="Nomor Telepon" required>
+                        <input type="text" name="institusi" class="input-field" placeholder="Asal Institusi" required>
+                        <input type="password" name="password" class="input-field" placeholder="Password" required
+                            minlength="8">
+                        <input type="password" name="confirm_password" class="input-field"
+                            placeholder="Konfirmasi Password" required>
+
+                        <button type="submit" class="btn-submit">Sign Up</button>
+                    </div>
+
+                    <div class="mobile-toggle">
+                        <p>Sudah punya akun? <a href="#" onclick="toggleMode()">Sign In</a></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Red Sliding Panel Background -->
+        <div class="panel-overlay"></div>
+
+        <!-- Panels Container -->
+        <div class="panels-container">
+            <!-- Left Panel (shows when in sign-up mode) -->
+            <div class="panel left-panel">
+                <h3>Welcome To<br>Infranexia</h3>
+                <p>Sign In with email</p>
+                <button type="button" class="btn-transparent" id="sign-in-btn">Sign In</button>
+            </div>
+
+            <!-- Right Panel (shows when in sign-in mode) -->
+            <div class="panel right-panel">
+                <h3>Welcome To<br>Infranexia</h3>
+                <p>Sign Up with email</p>
+                <button type="button" class="btn-transparent" id="sign-up-btn">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const signUpBtn = document.getElementById('sign-up-btn');
+        const signInBtn = document.getElementById('sign-in-btn');
+        const container = document.getElementById('authContainer');
+
+        // Switch to Sign Up mode
+        signUpBtn.addEventListener('click', () => {
+            container.classList.add('sign-up-mode');
+        });
+
+        // Switch to Sign In mode
+        signInBtn.addEventListener('click', () => {
+            container.classList.remove('sign-up-mode');
+        });
+
+        // Mobile toggle function
+        function toggleMode() {
+            container.classList.toggle('sign-up-mode');
+        }
+
+        // Check URL parameter to determine initial mode
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'register') {
+            container.classList.add('sign-up-mode');
+        }
+    </script>
+</body>
+
+<%- include('partials/logout-modal') %>
+    <%- include('partials/toast-notification') %>
+
+</html>

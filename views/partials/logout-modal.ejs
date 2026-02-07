@@ -1,0 +1,160 @@
+<!-- Logout Confirmation Modal -->
+<style>
+    .logout-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 9999;
+    }
+
+    .logout-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .logout-modal {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        transform: scale(0.8) translateY(20px);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .logout-modal-overlay.active .logout-modal {
+        transform: scale(1) translateY(0);
+    }
+
+    .logout-modal-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+    }
+
+    .logout-modal-icon svg {
+        width: 40px;
+        height: 40px;
+        color: #E31937;
+    }
+
+    .logout-modal h3 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 12px;
+    }
+
+    .logout-modal p {
+        font-size: 15px;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .logout-modal-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .logout-modal-btn {
+        padding: 14px 32px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .logout-modal-btn.cancel {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .logout-modal-btn.cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .logout-modal-btn.confirm {
+        background: #E31937;
+        color: #ffffff;
+    }
+
+    .logout-modal-btn.confirm:hover {
+        background: #c41230;
+    }
+</style>
+<div class="logout-modal-overlay" id="logoutModal">
+    <div class="logout-modal">
+        <div class="logout-modal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+        </div>
+        <h3>Konfirmasi Logout</h3>
+        <p>Apakah Anda yakin ingin keluar dari akun Anda?</p>
+        <div class="logout-modal-buttons">
+            <button class="logout-modal-btn cancel" onclick="hideLogoutModal()">Batal</button>
+            <a href="/auth/logout" class="logout-modal-btn confirm">Ya, Logout</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-attach to all logout links (except the one in modal)
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoutLinks = document.querySelectorAll('a[href="/auth/logout"]:not(.logout-modal-btn), a.logout:not(.logout-modal-btn)');
+        logoutLinks.forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                showLogoutModal();
+            });
+        });
+    });
+
+    function showLogoutModal() {
+        document.getElementById('logoutModal').classList.add('active');
+    }
+
+    function hideLogoutModal() {
+        document.getElementById('logoutModal').classList.remove('active');
+    }
+
+    // Close modal on overlay click
+    document.getElementById('logoutModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            hideLogoutModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            hideLogoutModal();
+        }
+    });
+</script>
