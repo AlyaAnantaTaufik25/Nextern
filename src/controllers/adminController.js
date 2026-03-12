@@ -1,6 +1,6 @@
 const db = require('../confiq/database');
 const path = require('path');
-const { generateAcceptanceLetter } = require('../utils/pdfGenerator');
+const { generateAcceptanceLetter, generateCompletionLetter } = require('../utils/pdfGenerator');
 const moment = require('moment');
 require('moment/locale/id');
 moment.locale('id');
@@ -49,30 +49,60 @@ exports.dashboard = async (req, res) => {
         }
         const [selesai] = await db.query(`SELECT COUNT(*) as count FROM pendaftaran ${selesaiWhere}`, queryParams);
 
-        // Recent pendaftaran - confusing to filter "recent" by old dates, but user asked for "filter dashboard".
-        // Usually "Recent" implies order by time. If filter is applied, it shows "Pendaftaran in that period".
-        // We will Apply the filter to this list as well.
-        let recentQuery = `
-            SELECT p.*, u.nama_depan, u.nama_belakang, u.email 
+        // Query active interns per division with their names and activity stats
+        const [divisionInterns] = await db.query(`
+            SELECT p.divisi_penempatan, p.nama_lengkap, p.user_id, p.waktu_mulai, p.waktu_selesai,
+                   u.nama_depan, u.nama_belakang, u.email,
+                   COALESCE(a.total_absensi, 0) as total_absensi,
+                   COALESCE(l.total_logbook, 0) as total_logbook
             FROM pendaftaran p 
             JOIN users u ON p.user_id = u.id 
-        `;
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) as total_absensi FROM absensi GROUP BY user_id
+            ) a ON a.user_id = p.user_id
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) as total_logbook FROM logbook GROUP BY user_id
+            ) l ON l.user_id = p.user_id
+            WHERE p.status = 'diterima' AND p.divisi_penempatan IS NOT NULL
+            ORDER BY p.divisi_penempatan, p.nama_lengkap
+        `);
 
-        // We need to qualify the created_at in whereClause to p.created_at because of the JOIN potentially (though users also has created_at)
-        // Actually pendaftaran has created_at as per the queries.
-        // Let's be specific: p.created_at
-        let recentWhereClause = '';
-        if (year && month) {
-            recentWhereClause = 'WHERE YEAR(p.created_at) = ? AND MONTH(p.created_at) = ?';
-        } else if (year) {
-            recentWhereClause = 'WHERE YEAR(p.created_at) = ?';
-        } else if (month) {
-            recentWhereClause = 'WHERE MONTH(p.created_at) = ?';
-        }
+        // Group by division
+        const divisionStats = {
+            'AOM': { full: 'Account Operation Maintenance', count: 0, interns: [] },
+            'ASO': { full: 'Access Support Operation', count: 0, interns: [] },
+            'NOC': { full: 'Network Operation Center', count: 0, interns: [] }
+        };
 
-        recentQuery += ` ${recentWhereClause} ORDER BY p.created_at DESC LIMIT 10`;
+        divisionInterns.forEach(intern => {
+            const nama = intern.nama_lengkap || `${intern.nama_depan} ${intern.nama_belakang || ''}`.trim();
+            let durasiHari = 0;
+            if (intern.waktu_mulai && intern.waktu_selesai) {
+                durasiHari = Math.ceil((new Date(intern.waktu_selesai) - new Date(intern.waktu_mulai)) / (1000 * 60 * 60 * 24));
+            }
+            const progress = durasiHari > 0 ? Math.min(100, Math.round((intern.total_logbook / durasiHari) * 100)) : 0;
 
-        const [recentPendaftaran] = await db.query(recentQuery, queryParams);
+            const internData = { 
+                userId: intern.user_id,
+                nama, 
+                email: intern.email, 
+                totalAbsensi: intern.total_absensi, 
+                totalLogbook: intern.total_logbook, 
+                durasiHari,
+                progress 
+            };
+
+            if (intern.divisi_penempatan === 'Account Operation Maintenance') {
+                divisionStats['AOM'].count++;
+                divisionStats['AOM'].interns.push(internData);
+            } else if (intern.divisi_penempatan === 'Access Support Operation') {
+                divisionStats['ASO'].count++;
+                divisionStats['ASO'].interns.push(internData);
+            } else if (intern.divisi_penempatan === 'Network Operation Center') {
+                divisionStats['NOC'].count++;
+                divisionStats['NOC'].interns.push(internData);
+            }
+        });
 
         res.render('admin/dashboard', {
             title: 'Dashboard Admin - Infranexia',
@@ -82,7 +112,7 @@ exports.dashboard = async (req, res) => {
                 pesertaAktif: pesertaAktif[0].count,
                 selesai: selesai[0].count
             },
-            recentPendaftaran,
+            divisionStats,
             filter: { year, month }
         });
     } catch (error) {
@@ -128,10 +158,17 @@ exports.pendaftaranDetail = async (req, res) => {
             return res.status(404).send('Pendaftaran tidak ditemukan');
         }
 
+        let hasSelesaiLetter = false;
+        if (pendaftaran[0].status === 'selesai') {
+            const [surat] = await db.query(`SELECT id FROM surat WHERE pendaftaran_id = ? AND tipe_surat = 'selesai' LIMIT 1`, [id]);
+            hasSelesaiLetter = surat.length > 0;
+        }
+
         res.render('admin/pendaftaran-detail', {
             title: 'Detail Pendaftaran - Infranexia',
             currentPage: 'pendaftaran',
-            data: pendaftaran[0]
+            data: pendaftaran[0],
+            hasSelesaiLetter
         });
     } catch (error) {
         console.error('Admin pendaftaran detail error:', error);
@@ -143,9 +180,13 @@ exports.pendaftaranDetail = async (req, res) => {
 exports.updateStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, divisi_penempatan } = req.body;
 
-        await db.query('UPDATE pendaftaran SET status = ? WHERE id = ?', [status, id]);
+        if (status === 'diterima' && divisi_penempatan) {
+            await db.query('UPDATE pendaftaran SET status = ?, divisi_penempatan = ? WHERE id = ?', [status, divisi_penempatan, id]);
+        } else {
+            await db.query('UPDATE pendaftaran SET status = ? WHERE id = ?', [status, id]);
+        }
 
         if (status === 'diterima') {
             // Fetch detailed pendaftaran data for PDF
@@ -161,7 +202,7 @@ exports.updateStatus = async (req, res) => {
             // Generate letter number
             const year = moment().format('YYYY');
             const month = moment().format('MM');
-            const [maxSeq] = await db.query('SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ?', [year]);
+            const [maxSeq] = await db.query(`SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ? AND (tipe_surat = 'balasan' OR tipe_surat IS NULL)`, [year]);
             const nextSeq = (maxSeq[0].maxS || 0) + 1;
             const seqStr = String(nextSeq).padStart(3, '0');
             const noSurat = `Tel. 11.${seqStr}/TIF/${month}/${year}`;
@@ -228,7 +269,7 @@ exports.userDetail = async (req, res) => {
         const { id } = req.params;
 
         const [users] = await db.query(`
-            SELECT u.*, p.bidang, p.jurusan, p.status as pendaftaran_status
+            SELECT u.*, p.bidang, p.jurusan, p.status as pendaftaran_status, p.id as pendaftaran_id
             FROM users u
             LEFT JOIN pendaftaran p ON u.id = p.user_id
             WHERE u.id = ?
@@ -238,10 +279,17 @@ exports.userDetail = async (req, res) => {
             return res.status(404).send('User tidak ditemukan');
         }
 
+        let hasSelesaiLetter = false;
+        if (users[0].pendaftaran_status === 'selesai' && users[0].pendaftaran_id) {
+            const [surat] = await db.query(`SELECT id FROM surat WHERE pendaftaran_id = ? AND tipe_surat = 'selesai' LIMIT 1`, [users[0].pendaftaran_id]);
+            hasSelesaiLetter = surat.length > 0;
+        }
+
         res.render('admin/user-detail', {
             title: 'Detail User - Infranexia',
             currentPage: 'users',
-            data: users[0]
+            data: users[0],
+            hasSelesaiLetter
         });
     } catch (error) {
         console.error('Admin user detail error:', error);
@@ -394,5 +442,73 @@ exports.surat = async (req, res) => {
     } catch (error) {
         console.error('Admin surat error:', error);
         res.status(500).send('Terjadi kesalahan');
+    }
+};
+// Generate completion letter
+exports.generateCompletionLetter = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Fetch detailed pendaftaran data
+        const [dataList] = await db.query(`
+            SELECT p.*, u.nama_depan, u.nama_belakang, u.email, u.no_telepon, u.institusi 
+            FROM pendaftaran p 
+            JOIN users u ON p.user_id = u.id 
+            WHERE p.id = ?
+        `, [id]);
+
+        if (dataList.length === 0) {
+            return res.status(404).json({ success: false, message: 'Pendaftaran tidak ditemukan' });
+        }
+
+        const p = dataList[0];
+
+        // Only allow for completed status
+        if (p.status !== 'selesai') {
+            return res.status(400).json({ success: false, message: 'Peserta belum selesai magang' });
+        }
+
+        // Generate letter number specific to Surat Tanda Selesai
+        const year = moment().format('YYYY');
+        const month = moment().format('MM');
+        
+        // Count existing selesai letters for the current year to get the sequence
+        const [maxSeq] = await db.query('SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ? AND tipe_surat = ?', [year, 'selesai']);
+        const nextSeq = (maxSeq[0].maxS || 0) + 1;
+        const seqStr = String(nextSeq).padStart(2, '0');
+        const noSurat = `${seqStr}.03/TIF/${month}/${year}`;
+
+        // Calculate working days (approximate or precise if dateHelper is used)
+        // For now using the simple subtraction from dashboard logic
+        const startDate = new Date(p.waktu_mulai);
+        const endDate = new Date(p.waktu_selesai);
+        const durasiHari = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+        // Prepare PDF data
+        const pdfData = {
+            no_surat: noSurat,
+            date: moment().format('D MMMM YYYY'),
+            intern_name: p.nama_lengkap,
+            intern_origin: p.instansi,
+            intern_id: p.nim || '-',
+            days: durasiHari,
+            startDate: moment(p.waktu_mulai).format('D MMMM YYYY'),
+            endDate: moment(p.waktu_selesai).format('D MMMM YYYY'),
+            manager_name: 'RINI MARLINI', // Default from provided image
+            manager_role: 'Head Of District Padang'
+        };
+
+        const filePathRelative = await generateCompletionLetter(pdfData);
+
+        // Save to surat table with tipe_surat = 'selesai'
+        await db.query(`
+            INSERT INTO surat (no_surat, sequence, user_id, pendaftaran_id, file_path, perihal, target_nama, tipe_surat)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'selesai')
+        `, [noSurat, nextSeq, p.user_id, id, filePathRelative, `Surat Keterangan Selesai Magang - ${p.nama_lengkap}`, p.nama_lengkap]);
+
+        res.json({ success: true, message: 'Surat Tanda Selesai berhasil dibuat' });
+    } catch (error) {
+        console.error('Generate completion letter error:', error);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan' });
     }
 };

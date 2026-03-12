@@ -115,6 +115,24 @@
             color: #64748b;
             pointer-events: none;
         }
+
+        .date-helper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #64748b;
+            background: #fef2f2;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #fecdd3;
+        }
+
+        .date-helper svg {
+            flex-shrink: 0;
+            color: #E31937;
+        }
     </style>
 </head>
 
@@ -166,9 +184,42 @@
                 <div class="form-group">
                     <label for="tanggal">Tanggal</label>
                     <div class="date-input-wrapper">
+                        <% 
+                            let minDate = '';
+                            let maxDate = '';
+                            if (pendaftaran) {
+                                minDate = new Date(pendaftaran.waktu_mulai).toISOString().split('T')[0];
+                                maxDate = new Date(pendaftaran.waktu_selesai).toISOString().split('T')[0];
+                            }
+                            
+                            let defaultDate = entry ? entry.tanggal : new Date().toLocaleDateString('en-CA');
+                            // Clamp default date to min/max range
+                            if (minDate && defaultDate < minDate) defaultDate = minDate;
+                            if (maxDate && defaultDate > maxDate) defaultDate = maxDate;
+                        %>
                         <input type="date" class="form-control" id="tanggal" name="tanggal"
-                            value="<%= entry ? entry.tanggal : new Date().toLocaleDateString('en-CA') %>" required>
+                            value="<%= defaultDate %>"
+                            <% if (minDate) { %>min="<%= minDate %>"<% } %>
+                            <% if (maxDate) { %>max="<%= maxDate %>"<% } %>
+                            required>
                     </div>
+                    <% if (pendaftaran) { %>
+                    <div class="date-helper">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <% 
+                            const months_h = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                            const mulaiD = new Date(pendaftaran.waktu_mulai);
+                            const selesaiD = new Date(pendaftaran.waktu_selesai);
+                            const fmtMulai = `${String(mulaiD.getDate()).padStart(2, '0')} ${months_h[mulaiD.getMonth()]} ${mulaiD.getFullYear()}`;
+                            const fmtSelesai = `${String(selesaiD.getDate()).padStart(2, '0')} ${months_h[selesaiD.getMonth()]} ${selesaiD.getFullYear()}`;
+                        %>
+                        Periode magang: <strong><%= fmtMulai %> — <%= fmtSelesai %></strong> (hanya hari kerja)
+                    </div>
+                    <% } %>
                 </div>
 
                 <div class="form-group">
@@ -187,6 +238,21 @@
     </div>
 
     <script>
+        // Disable weekends on date picker
+        const dateInput = document.getElementById('tanggal');
+        dateInput.addEventListener('input', function() {
+            const val = this.value;
+            if (val) {
+                const [y, m, d] = val.split('-').map(Number);
+                const date = new Date(y, m - 1, d);
+                const day = date.getDay();
+                if (day === 0 || day === 6) {
+                    showToast('Logbook hanya dapat diisi untuk hari kerja (Senin - Jumat)', 'warning');
+                    this.value = '';
+                }
+            }
+        });
+
         document.getElementById('logbookForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 

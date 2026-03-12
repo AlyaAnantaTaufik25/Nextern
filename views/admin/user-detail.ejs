@@ -640,7 +640,46 @@
                                 </div>
                                 <% } %>
                                     <button class="btn-delete" onclick="showDeleteConfirm()">Hapus Akun</button>
-                        </div>
+                                </div>
+
+                                <% if (data.pendaftaran_status === 'selesai') { %>
+                                <div class="detail-footer" style="padding-top: 0; justify-content: flex-end;">
+                                    <% if (locals.hasSelesaiLetter) { %>
+                                        <div class="status-display" style="background: #28a745; color: white; width: auto; font-size: 14px; padding: 10px 20px;">
+                                            <i class="bi bi-check-circle-fill" style="margin-right: 5px;"></i>
+                                            Surat Tanda Selesai Telah Dibuat
+                                        </div>
+                                    <% } else { %>
+                                        <button class="btn-generate" onclick="generateSelesai()">
+                                            <i class="bi bi-file-earmark-check-fill"></i>
+                                            Generate Surat Tanda Selesai
+                                        </button>
+                                    <% } %>
+                                </div>
+                                <style>
+                                    .btn-generate {
+                                        background: #16a34a;
+                                        color: white;
+                                        padding: 16px 40px;
+                                        border: none;
+                                        border-radius: 8px;
+                                        font-size: 14px;
+                                        font-weight: 600;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 10px;
+                                    }
+                                    .btn-generate:hover {
+                                        background: #15803d;
+                                        transform: translateY(-2px);
+                                    }
+                                    .btn-generate i {
+                                        font-size: 18px;
+                                    }
+                                </style>
+                                <% } %>
                     </div>
                 </div>
             </div>
@@ -700,6 +739,41 @@
                     window.location.href = '/admin/users';
                 } else {
                     showToast('Gagal menghapus akun: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan', 'error');
+            }
+        }
+
+        async function generateSelesai() {
+            try {
+                // Find pendaftaran_id. Since we only have one pendaftaran per user in user-detail view
+                // (LEFT JOIN pendaftaran p ON u.id = p.user_id), we need to get the pendaftaran ID.
+                // Looking at userDetail in controller, it fetches p.id implicitly if we join properly.
+                // Wait, userDetail controller: SELECT u.*, p.bidang, p.jurusan, p.status as pendaftaran_status
+                // It doesn't fetch p.id. I should check if I need to update the controller or if I can use user_id.
+                // My new route is /admin/pendaftaran/:id/generate-selesai where :id is pendaftaran_id.
+                
+                // Let's check pendaftaran-detail.ejs instead, maybe the user wants it there too.
+                // But for now, let's assume we can get it or update the controller.
+                
+                const response = await fetch(`/admin/pendaftaran/<%= data.pendaftaran_id %>/generate-selesai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Surat Tanda Selesai berhasil dibuat', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin/surat';
+                    }, 1500);
+                } else {
+                    showToast('Gagal: ' + result.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);

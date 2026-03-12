@@ -14,6 +14,7 @@ router.get('/', adminController.dashboard);
 router.get('/pendaftaran', adminController.pendaftaran);
 router.get('/pendaftaran/:id', adminController.pendaftaranDetail);
 router.put('/pendaftaran/:id/status', adminController.updateStatus);
+router.post('/pendaftaran/:id/generate-selesai', adminController.generateCompletionLetter);
 
 // User management
 router.get('/users', adminController.users);

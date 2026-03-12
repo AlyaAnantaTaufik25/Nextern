@@ -190,4 +190,149 @@ async function generateAcceptanceLetter(data) {
     });
 }
 
-module.exports = { generateAcceptanceLetter };
+/**
+ * Generate official completion letter (Surat Tanda Selesai)
+ * @param {Object} data - { no_surat, date, intern_name, intern_origin, intern_id, days, startDate, endDate, manager_name, manager_role }
+ * @returns {Promise<string>} - Relative path to the generated PDF
+ */
+async function generateCompletionLetter(data) {
+    return new Promise((resolve, reject) => {
+        try {
+            const margin = 57;
+            const doc = new PDFDocument({
+                size: 'A4',
+                margin: 0
+            });
+
+            const fileName = `surat_selesai_${Date.now()}.pdf`;
+            const uploadDir = path.join(__dirname, '../../public/uploads/surat_selesai');
+
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const filePath = path.join(uploadDir, fileName);
+            const stream = fs.createWriteStream(filePath);
+            doc.pipe(stream);
+
+            let currentY = 50;
+            const contentWidth = doc.page.width - (margin * 2);
+
+            // Header Logo (Top Right)
+            const logoPath = path.join(__dirname, '../../public/img/logotelkom.png');
+            if (fs.existsSync(logoPath)) {
+                doc.image(logoPath, doc.page.width - margin - 170, 25, { width: 170 });
+            }
+
+            currentY = 110;
+
+            // Header Info
+            doc.font('Helvetica').fontSize(11).fillColor('#000');
+            doc.text('Nomor', margin, currentY);
+            doc.text(`: ${data.no_surat}`, margin + 70, currentY);
+
+            currentY += 18;
+            doc.text('Lampiran', margin, currentY);
+            doc.text(': -', margin + 70, currentY);
+
+            currentY += 18;
+            doc.text('Perihal', margin, currentY);
+            doc.font('Helvetica-Bold').text(`: Surat Keterangan Praktek Kerja Lapangan an ${data.intern_name}`, margin + 70, currentY, { width: contentWidth - 70 });
+
+            currentY = doc.y + 40;
+
+            // Opening
+            doc.font('Helvetica').fontSize(11).text('Yang bertanda tangan di bawah ini:', margin, currentY);
+            
+            currentY += 25;
+            doc.text('Nama', margin, currentY);
+            doc.text(`: ${data.manager_name || '...........................................'}`, margin + 70, currentY);
+            currentY += 18;
+            doc.text('Jabatan', margin, currentY);
+            doc.text(`: ${data.manager_role || '...........................................'}`, margin + 70, currentY);
+
+            currentY += 35;
+            doc.text('Dengan ini menerangkan bahwa:', margin, currentY);
+
+            currentY += 30;
+            doc.text('Nama', margin, currentY);
+            doc.font('Helvetica-Bold').text(`: ${data.intern_name}`, margin + 70, currentY);
+            currentY += 18;
+            doc.font('Helvetica').text('Asal', margin, currentY);
+            doc.text(`: ${data.intern_origin}`, margin + 70, currentY);
+            currentY += 18;
+            doc.text('NIM / ID Pemagang', margin, currentY);
+            doc.text(`: ${data.intern_id}`, margin + 110, currentY);
+
+            currentY += 35;
+            doc.font('Helvetica').text(`telah menyelesaikan kegiatan magang kerja atau praktik kerja lapangan (PKL) di perusahaan kami selama ${data.days} hari kerja sejak tanggal ${data.startDate} sampai dengan ${data.endDate}.`, margin, currentY, {
+                align: 'justify',
+                lineGap: 4,
+                width: contentWidth
+            });
+
+            currentY = doc.y + 20;
+            doc.text(`${data.intern_name} telah selesai melaksanakan tugas serta tanggung jawab dengan baik selama kegiatan magang kerja di perusahaan kami. Selain itu, pihak yang bersangkutan juga aktif mempelajari serta mengikuti kegiatan yang dilaksanakan di perusahaan.`, margin, currentY, {
+                align: 'justify',
+                lineGap: 4,
+                width: contentWidth
+            });
+
+            currentY = doc.y + 20;
+            doc.text('Demikian, surat keterangan ini kami buat agar dipergunakan semestinya.', margin, currentY);
+
+            currentY = doc.y + 60;
+            doc.text(`Padang, ${data.date || moment().format('D MMMM YYYY')}`, margin, currentY);
+            doc.text('Hormat Kami,', margin, currentY + 18);
+
+            currentY += 60;
+            // Logo overlay for signature area
+            const signLogoPath = path.join(__dirname, '../../public/img/logotelkom.png');
+            if (fs.existsSync(signLogoPath)) {
+                // Subtle logo in background of signature
+                // doc.image(signLogoPath, margin + 20, currentY - 30, { width: 120, opacity: 0.8 });
+            }
+
+            currentY += 20;
+            doc.font('Helvetica-Bold').text(data.manager_name ? data.manager_name.toUpperCase() : '( .......................................... )', margin, currentY, { underline: !!data.manager_name });
+            doc.font('Helvetica').fontSize(10).text(data.manager_role ? data.manager_role.toUpperCase() : '', margin, currentY + 15);
+            doc.text('PT TELKOM INFRASTRUKTUR INDONESIA', margin, currentY + 28);
+
+            // --- HD VECTOR FOOTER ---
+            const footerY = doc.page.height - 100;
+            const footerHeight = 70;
+
+            doc.rect(0, footerY + 15, 220, 60).fill('#7fa99c');
+            doc.fillColor('#000').font('Helvetica-Bold').fontSize(9).text('District Sumatera Barat', 235, footerY + 22);
+            doc.text('PT Telkom Infrastruktur Indonesia', 235, footerY + 33);
+            doc.font('Helvetica').fontSize(8.5).text('Jl. Kh. Ahmad Dahlan No. 17', 235, footerY + 44);
+            doc.text('Padang - 25138', 235, footerY + 55);
+
+            const rightBlocksX = 485;
+            doc.rect(rightBlocksX, footerY + 15, 15, 60).fill('#5d4037'); 
+            doc.rect(rightBlocksX + 15, footerY + 15, 95, 60).fill('#e31937'); 
+
+            const footerLogoPath = path.join(__dirname, '../../public/img/logo N.png');
+            if (fs.existsSync(footerLogoPath)) {
+                doc.image(footerLogoPath, rightBlocksX + 37.5, footerY + 20, { width: 50 });
+            } else {
+                doc.fillColor('#fff').font('Helvetica-Bold').fontSize(38).text('N', rightBlocksX + 40, footerY + 25);
+            }
+
+            doc.end();
+
+            stream.on('finish', () => {
+                resolve('/uploads/surat_selesai/' + fileName);
+            });
+
+            stream.on('error', (err) => {
+                reject(err);
+            });
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+module.exports = { generateAcceptanceLetter, generateCompletionLetter };

@@ -632,6 +632,185 @@
             background: #c82333;
         }
 
+        /* Division Selection Modal */
+        .division-modal-card {
+            background: white;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border-top: 5px solid #29B6F6;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .division-modal-body {
+            padding: 45px 40px 40px;
+        }
+
+        .division-modal-body h3 {
+            font-size: 18px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 35px;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+
+        .division-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .division-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .division-option input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border: 2.5px solid #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .division-option input[type="radio"]:checked {
+            border-color: #29B6F6;
+        }
+
+        .division-option input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #29B6F6;
+        }
+
+        .division-option label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .division-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .btn-pilih {
+            background: linear-gradient(135deg, #6BCB77 0%, #4CAF50 100%);
+            color: white;
+            padding: 14px 50px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107, 203, 119, 0.35);
+        }
+
+        .btn-pilih:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 203, 119, 0.45);
+        }
+
+        .btn-kembali {
+            background: linear-gradient(135deg, #FF6B6B 0%, #EF4444 100%);
+            color: white;
+            padding: 14px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.35);
+        }
+
+        .btn-kembali:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.45);
+        }
+
+        /* Accept Confirmation Modal */
+        .accept-confirm-card {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border-top: 5px solid #29B6F6;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .accept-confirm-body {
+            padding: 45px 40px 40px;
+        }
+
+        .accept-confirm-body h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .accept-confirm-info {
+            margin-bottom: 35px;
+            padding: 0 5px;
+        }
+
+        .accept-confirm-info p {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .accept-confirm-info span {
+            font-weight: 400;
+            color: #555;
+        }
+
         .modal-close {
             position: absolute;
             top: 20px;
@@ -844,7 +1023,7 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Confirmation Modal (for reject) -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal" style="max-width: 400px;">
             <div class="confirm-modal">
@@ -858,9 +1037,55 @@
         </div>
     </div>
 
+    <!-- Division Selection Modal -->
+    <div class="modal-overlay" id="divisionModal">
+        <div class="division-modal-card">
+            <div class="division-modal-body">
+                <h3>Pilih divisi yang akan ditempatkan...</h3>
+                <div class="division-list">
+                    <div class="division-option">
+                        <input type="radio" name="divisi" id="divisi1" value="Account Operation Maintenance">
+                        <label for="divisi1">Account Operation Maintenance</label>
+                    </div>
+                    <div class="division-option">
+                        <input type="radio" name="divisi" id="divisi2" value="Access Support Operation">
+                        <label for="divisi2">Access Support Operation</label>
+                    </div>
+                    <div class="division-option">
+                        <input type="radio" name="divisi" id="divisi3" value="Network Operation Center">
+                        <label for="divisi3">Network Operation Center</label>
+                    </div>
+                </div>
+                <div class="division-buttons">
+                    <button class="btn-pilih" onclick="selectDivision()">PILIH</button>
+                    <button class="btn-kembali" onclick="closeDivisionModal()">KEMBALI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accept Confirmation Modal -->
+    <div class="modal-overlay" id="acceptConfirmModal">
+        <div class="accept-confirm-card">
+            <div class="accept-confirm-body">
+                <h3>Anda Yakin Menerima:</h3>
+                <div class="accept-confirm-info">
+                    <p>Nama: <span id="confirmNama"></span></p>
+                    <p>Durasi magang: <span id="confirmDurasi"></span></p>
+                    <p>Divisi ditempatkan: <span id="confirmDivisi"></span></p>
+                </div>
+                <div class="division-buttons">
+                    <button class="btn-pilih" id="acceptYes">YA</button>
+                    <button class="btn-kembali" onclick="closeAcceptConfirmModal()">KEMBALI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentPendaftaranId = null;
         let currentAction = null;
+        let selectedDivisi = null;
 
         // Sample data for modal (in real app, fetch from API)
         const pendaftaranData = {
@@ -950,24 +1175,66 @@
 
         function showConfirm(action) {
             currentAction = action;
-            document.getElementById('confirmModal').classList.add('active');
-            document.getElementById('confirmYes').onclick = function () {
-                updateStatus(currentPendaftaranId, action);
+            if (action === 'diterima') {
+                // Show division selection modal first
+                selectedDivisi = null;
+                document.querySelectorAll('input[name="divisi"]').forEach(r => r.checked = false);
+                document.getElementById('divisionModal').classList.add('active');
+            } else {
+                // For reject, show the old confirmation modal
+                document.getElementById('confirmModal').classList.add('active');
+                document.getElementById('confirmYes').onclick = function () {
+                    updateStatus(currentPendaftaranId, action);
+                };
+            }
+        }
+
+        function closeDivisionModal() {
+            document.getElementById('divisionModal').classList.remove('active');
+        }
+
+        function selectDivision() {
+            const selected = document.querySelector('input[name="divisi"]:checked');
+            if (!selected) {
+                showToast('Silakan pilih divisi terlebih dahulu', 'error');
+                return;
+            }
+            selectedDivisi = selected.value;
+            closeDivisionModal();
+
+            // Show accept confirmation modal with details
+            const data = pendaftaranData[currentPendaftaranId];
+            document.getElementById('confirmNama').textContent = data.nama;
+            document.getElementById('confirmDurasi').textContent = data.durasi;
+            document.getElementById('confirmDivisi').textContent = selectedDivisi;
+
+            document.getElementById('acceptConfirmModal').classList.add('active');
+            document.getElementById('acceptYes').onclick = function () {
+                updateStatus(currentPendaftaranId, 'diterima', selectedDivisi);
             };
+        }
+
+        function closeAcceptConfirmModal() {
+            document.getElementById('acceptConfirmModal').classList.remove('active');
         }
 
         function closeConfirmModal() {
             document.getElementById('confirmModal').classList.remove('active');
         }
 
-        async function updateStatus(id, status) {
+        async function updateStatus(id, status, divisiPenempatan) {
             try {
+                const bodyData = { status };
+                if (divisiPenempatan) {
+                    bodyData.divisi_penempatan = divisiPenempatan;
+                }
+
                 const response = await fetch(`/admin/pendaftaran/${id}/status`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ status })
+                    body: JSON.stringify(bodyData)
                 });
 
                 const result = await response.json();
@@ -1049,6 +1316,18 @@
         document.getElementById('confirmModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeConfirmModal();
+            }
+        });
+
+        document.getElementById('divisionModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeDivisionModal();
+            }
+        });
+
+        document.getElementById('acceptConfirmModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeAcceptConfirmModal();
             }
         });
     </script>

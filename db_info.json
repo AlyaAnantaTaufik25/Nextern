@@ -57,6 +57,14 @@
       "Extra": ""
     },
     {
+      "Field": "divisi_penempatan",
+      "Type": "varchar(255)",
+      "Null": "YES",
+      "Key": "",
+      "Default": null,
+      "Extra": ""
+    },
+    {
       "Field": "waktu_mulai",
       "Type": "date",
       "Null": "YES",
@@ -82,7 +90,7 @@
     },
     {
       "Field": "status",
-      "Type": "enum('formulir','verifikasi','diterima','ditolak')",
+      "Type": "enum('formulir','verifikasi','diterima','ditolak','selesai')",
       "Null": "YES",
       "Key": "",
       "Default": "formulir",
@@ -115,7 +123,7 @@
   ],
   "statusColumn": {
     "Field": "status",
-    "Type": "enum('formulir','verifikasi','diterima','ditolak')",
+    "Type": "enum('formulir','verifikasi','diterima','ditolak','selesai')",
     "Null": "YES",
     "Key": "",
     "Default": "formulir",

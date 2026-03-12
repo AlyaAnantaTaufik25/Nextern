@@ -256,10 +256,10 @@ exports.downloadSurat = async (req, res) => {
     try {
         const userId = req.session.user.id;
 
-        // Find the latest accepted surat for this user
+        // Find the latest accepted surat (balasan) for this user
         const [surat] = await db.query(`
             SELECT file_path FROM surat 
-            WHERE user_id = ? 
+            WHERE user_id = ? AND tipe_surat = 'balasan'
             ORDER BY created_at DESC LIMIT 1
         `, [userId]);
 
@@ -276,6 +276,35 @@ exports.downloadSurat = async (req, res) => {
         res.download(filePath);
     } catch (error) {
         console.error('Download surat error:', error);
+        res.status(500).send('Terjadi kesalahan');
+    }
+};
+
+// Download completion letter
+exports.downloadSuratSelesai = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+
+        // Find the latest completion certificate for this user
+        const [surat] = await db.query(`
+            SELECT file_path FROM surat 
+            WHERE user_id = ? AND tipe_surat = 'selesai'
+            ORDER BY created_at DESC LIMIT 1
+        `, [userId]);
+
+        if (surat.length === 0) {
+            return res.status(404).send('Surat Tanda Selesai belum tersedia');
+        }
+
+        const filePath = path.join(__dirname, '../../public', surat[0].file_path);
+        if (!fs.existsSync(filePath)) {
+            console.error('File not found:', filePath);
+            return res.status(404).send('File fisik tidak ditemukan');
+        }
+
+        res.download(filePath);
+    } catch (error) {
+        console.error('Download surat selesai error:', error);
         res.status(500).send('Terjadi kesalahan');
     }
 };

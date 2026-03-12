@@ -331,6 +331,258 @@
             color: #333;
         }
 
+        /* Division Stats Cards */
+        .division-stats-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .division-card {
+            border: 2px solid #eee;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .division-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .division-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .division-card.aom {
+            border-left: 5px solid #FF6B35;
+        }
+
+        .division-card.aso {
+            border-left: 5px solid #29B6F6;
+        }
+
+        .division-card.noc {
+            border-left: 5px solid #66BB6A;
+        }
+
+        .division-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .division-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .division-card-abbr {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .division-card-full {
+            font-size: 12px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .division-card-count {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .division-count-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #E31937;
+        }
+
+        .division-count-label {
+            font-size: 11px;
+            color: #999;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .division-card-arrow {
+            color: #ccc;
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+
+        .division-card.expanded .division-card-arrow {
+            transform: rotate(180deg);
+        }
+
+        .division-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+
+        .division-card.expanded .division-detail {
+            max-height: 2000px;
+            padding-top: 18px;
+        }
+
+        .division-detail-list {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 14px;
+        }
+
+        .division-intern-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .division-intern-item:last-child {
+            border-bottom: none;
+        }
+
+        .intern-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .intern-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E31937, #ff4d6a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .intern-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .intern-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .intern-email {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .intern-activity {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-left: 48px;
+        }
+
+        .activity-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .activity-badge i {
+            font-size: 12px;
+        }
+
+        .badge-absensi {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .badge-logbook {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        a.activity-badge {
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        a.activity-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+            filter: brightness(0.95);
+        }
+
+        .intern-progress {
+            padding-left: 48px;
+        }
+
+        .progress-bar-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar-bg {
+            flex: 1;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-bar-fill.low {
+            background: linear-gradient(90deg, #FF6B6B, #EF4444);
+        }
+
+        .progress-bar-fill.mid {
+            background: linear-gradient(90deg, #FFB74D, #FF9800);
+        }
+
+        .progress-bar-fill.high {
+            background: linear-gradient(90deg, #66BB6A, #4CAF50);
+        }
+
+        .progress-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .division-empty {
+            text-align: center;
+            padding: 12px 0;
+            color: #bbb;
+            font-size: 13px;
+            font-style: italic;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .stats-grid {
@@ -621,44 +873,65 @@
                 <!-- Content Grid -->
                 <div class="content-grid">
                     <div class="content-box">
-                        <h3>Pendaftaran Terbaru</h3>
-                        <% if (recentPendaftaran && recentPendaftaran.length> 0) { %>
-                            <table class="recent-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>Divisi</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% recentPendaftaran.slice(0, 5).forEach(item=> { %>
-                                        <tr>
-                                            <td>
-                                                <%= item.nama_depan %>
-                                                    <%= item.nama_belakang %>
-                                            </td>
-                                            <td>
-                                                <%= item.divisi || '-' %>
-                                            </td>
-                                            <td>
-                                                <span class="status-badge status-<%= item.status %>">
-                                                    <%= item.status %>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                </tbody>
-                            </table>
-                            <% } else { %>
-                                <div class="empty-state">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14 2 14 8 20 8"></polyline>
-                                    </svg>
-                                    <span>Belum ada data pendaftaran</span>
+                        <h3>Peserta Aktif per Divisi</h3>
+                        <div class="division-stats-box">
+                            <% const divisions = ['AOM', 'ASO', 'NOC']; %>
+                            <% divisions.forEach(key => { %>
+                                <% const div = divisionStats[key]; %>
+                                <div class="division-card <%= key.toLowerCase() %>" onclick="toggleDivision(this)">
+                                    <div class="division-card-header">
+                                        <div class="division-card-info">
+                                            <span class="division-card-abbr"><%= key %></span>
+                                            <span class="division-card-full"><%= div.full %></span>
+                                        </div>
+                                        <div class="division-card-count">
+                                            <div>
+                                                <span class="division-count-number"><%= div.count %></span>
+                                                <span class="division-count-label"> orang</span>
+                                            </div>
+                                            <i class="bi bi-chevron-down division-card-arrow"></i>
+                                        </div>
+                                    </div>
+                                    <div class="division-detail">
+                                        <div class="division-detail-list">
+                                            <% if (div.interns.length > 0) { %>
+                                                <% div.interns.forEach(intern => { %>
+                                                    <div class="division-intern-item">
+                                                        <div class="intern-row">
+                                                            <div class="intern-avatar"><%= intern.nama.charAt(0).toUpperCase() %></div>
+                                                            <div class="intern-info">
+                                                                <span class="intern-name"><%= intern.nama %></span>
+                                                                <span class="intern-email"><%= intern.email %></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="intern-activity">
+                                                            <a href="/admin/users/<%= intern.userId %>/absensi" class="activity-badge badge-absensi" onclick="event.stopPropagation()">
+                                                                <i class="bi bi-calendar-check"></i>
+                                                                Absensi: <%= intern.totalAbsensi %> hari
+                                                            </a>
+                                                            <a href="/admin/users/<%= intern.userId %>/logbook" class="activity-badge badge-logbook" onclick="event.stopPropagation()">
+                                                                <i class="bi bi-journal-text"></i>
+                                                                Logbook: <%= intern.totalLogbook %>/<%= intern.durasiHari %>
+                                                            </a>
+                                                        </div>
+                                                        <div class="intern-progress">
+                                                            <div class="progress-bar-wrapper">
+                                                                <div class="progress-bar-bg">
+                                                                    <div class="progress-bar-fill <%= intern.progress < 30 ? 'low' : intern.progress < 70 ? 'mid' : 'high' %>" style="width: <%= intern.progress %>%"></div>
+                                                                </div>
+                                                                <span class="progress-label"><%= intern.progress %>%</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <div class="division-empty">Belum ada peserta aktif</div>
+                                            <% } %>
+                                        </div>
+                                    </div>
                                 </div>
-                                <% } %>
+                            <% }) %>
+                        </div>
                     </div>
                     <div class="content-box">
                         <h3>Perbandingan Data</h3>
@@ -684,6 +957,10 @@
                 dropdown.classList.remove('show');
             }
         });
+
+        function toggleDivision(card) {
+            card.classList.toggle('expanded');
+        }
 
         // Comparison Chart
         const ctx = document.getElementById('comparisonChart').getContext('2d');

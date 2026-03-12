@@ -450,6 +450,185 @@
             background: #c82333;
         }
 
+        /* Division Selection Modal */
+        .division-modal-card {
+            background: white;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border-top: 5px solid #29B6F6;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .division-modal-body {
+            padding: 45px 40px 40px;
+        }
+
+        .division-modal-body h3 {
+            font-size: 18px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 35px;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+
+        .division-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .division-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .division-option input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border: 2.5px solid #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .division-option input[type="radio"]:checked {
+            border-color: #29B6F6;
+        }
+
+        .division-option input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #29B6F6;
+        }
+
+        .division-option label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .division-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .btn-pilih {
+            background: linear-gradient(135deg, #6BCB77 0%, #4CAF50 100%);
+            color: white;
+            padding: 14px 50px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107, 203, 119, 0.35);
+        }
+
+        .btn-pilih:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 203, 119, 0.45);
+        }
+
+        .btn-kembali {
+            background: linear-gradient(135deg, #FF6B6B 0%, #EF4444 100%);
+            color: white;
+            padding: 14px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.35);
+        }
+
+        .btn-kembali:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.45);
+        }
+
+        /* Accept Confirmation Modal */
+        .accept-confirm-card {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border-top: 5px solid #29B6F6;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .accept-confirm-body {
+            padding: 45px 40px 40px;
+        }
+
+        .accept-confirm-body h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .accept-confirm-info {
+            margin-bottom: 35px;
+            padding: 0 5px;
+        }
+
+        .accept-confirm-info p {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .accept-confirm-info span {
+            font-weight: 400;
+            color: #555;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -638,19 +817,59 @@
                             <% if (data.status==='verifikasi' ) { %>
                                 <button class="btn-accept" onclick="showConfirm('diterima')">TERIMA PENDAFTARAN</button>
                                 <button class="btn-reject" onclick="showConfirm('ditolak')">TOLAK</button>
-                                <% } else { %>
-                                    <div class="status-display status-<%= data.status %>">
-                                        Status: <%= data.status.toUpperCase() %>
+                                <% } else if (data.status==='selesai') { %>
+                                    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center;">
+                                        <div class="status-display status-selesai" style="width: auto;">
+                                            Status: <%= data.status.toUpperCase() %>
+                                        </div>
+                                        <% if (locals.hasSelesaiLetter) { %>
+                                            <div class="status-display" style="background: #28a745; color: white; width: auto; font-size: 14px; padding: 10px 20px;">
+                                                <i class="bi bi-check-circle-fill" style="margin-right: 5px;"></i>
+                                                Surat Tanda Selesai Telah Dibuat
+                                            </div>
+                                        <% } else { %>
+                                            <button class="btn-generate" onclick="generateSelesai()">
+                                                <i class="bi bi-file-earmark-check-fill"></i>
+                                                Generate Surat Tanda Selesai
+                                            </button>
+                                        <% } %>
                                     </div>
-                                    <% } %>
+                                    <% } else { %>
+                                        <div class="status-display status-<%= data.status %>">
+                                            Status: <%= data.status.toUpperCase() %>
+                                        </div>
+                                        <% } %>
                         </div>
+                        <style>
+                            .btn-generate {
+                                background: #16a34a;
+                                color: white;
+                                padding: 16px 40px;
+                                border: none;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
+                            }
+                            .btn-generate:hover {
+                                background: #15803d;
+                                transform: translateY(-2px);
+                            }
+                            .btn-generate i {
+                                font-size: 18px;
+                            }
+                        </style>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Confirmation Modal (for reject) -->
     <div class="modal-overlay" id="confirmModal">
         <div class="confirm-modal">
             <h3>Anda Yakin</h3>
@@ -662,29 +881,151 @@
         </div>
     </div>
 
+    <!-- Division Selection Modal -->
+    <div class="modal-overlay" id="divisionModal">
+        <div class="division-modal-card">
+            <div class="division-modal-body">
+                <h3>Pilih divisi yang akan ditempatkan...</h3>
+                <div class="division-list">
+                    <div class="division-option">
+                        <input type="radio" name="divisi_detail" id="divisiDetail1" value="Account Operation Maintenance">
+                        <label for="divisiDetail1">Account Operation Maintenance</label>
+                    </div>
+                    <div class="division-option">
+                        <input type="radio" name="divisi_detail" id="divisiDetail2" value="Access Support Operation">
+                        <label for="divisiDetail2">Access Support Operation</label>
+                    </div>
+                    <div class="division-option">
+                        <input type="radio" name="divisi_detail" id="divisiDetail3" value="Network Operation Center">
+                        <label for="divisiDetail3">Network Operation Center</label>
+                    </div>
+                </div>
+                <div class="division-buttons">
+                    <button class="btn-pilih" onclick="selectDivision()">PILIH</button>
+                    <button class="btn-kembali" onclick="closeDivisionModal()">KEMBALI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accept Confirmation Modal -->
+    <div class="modal-overlay" id="acceptConfirmModal">
+        <div class="accept-confirm-card">
+            <div class="accept-confirm-body">
+                <h3>Anda Yakin Menerima:</h3>
+                <div class="accept-confirm-info">
+                    <p>Nama: <span id="confirmNama"></span></p>
+                    <p>Durasi magang: <span id="confirmDurasi"></span></p>
+                    <p>Divisi ditempatkan: <span id="confirmDivisi"></span></p>
+                </div>
+                <div class="division-buttons">
+                    <button class="btn-pilih" id="acceptYes">YA</button>
+                    <button class="btn-kembali" onclick="closeAcceptConfirmModal()">KEMBALI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentAction = null;
+        let selectedDivisi = null;
+
+        // Calculate duration for confirmation display
+        <% 
+            let durasiHari = '-';
+            if (data.waktu_mulai && data.waktu_selesai) {
+                const s = new Date(data.waktu_mulai);
+                const e = new Date(data.waktu_selesai);
+                durasiHari = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+            }
+        %>
 
         function showConfirm(action) {
             currentAction = action;
-            document.getElementById('confirmModal').classList.add('active');
-            document.getElementById('confirmYes').onclick = function () {
-                updateStatus(action);
+            if (action === 'diterima') {
+                // Show division selection modal first
+                selectedDivisi = null;
+                document.querySelectorAll('input[name="divisi_detail"]').forEach(r => r.checked = false);
+                document.getElementById('divisionModal').classList.add('active');
+            } else {
+                // For reject, show the old confirmation modal
+                document.getElementById('confirmModal').classList.add('active');
+                document.getElementById('confirmYes').onclick = function () {
+                    updateStatus(action);
+                };
+            }
+        }
+
+        function closeDivisionModal() {
+            document.getElementById('divisionModal').classList.remove('active');
+        }
+
+        function selectDivision() {
+            const selected = document.querySelector('input[name="divisi_detail"]:checked');
+            if (!selected) {
+                showToast('Silakan pilih divisi terlebih dahulu', 'error');
+                return;
+            }
+            selectedDivisi = selected.value;
+            closeDivisionModal();
+
+            // Show accept confirmation modal with details
+            document.getElementById('confirmNama').textContent = '<%= data.nama_depan %> <%= data.nama_belakang || "" %>';
+            document.getElementById('confirmDurasi').textContent = '<%= durasiHari %> Hari';
+            document.getElementById('confirmDivisi').textContent = selectedDivisi;
+
+            document.getElementById('acceptConfirmModal').classList.add('active');
+            document.getElementById('acceptYes').onclick = function () {
+                updateStatus('diterima', selectedDivisi);
             };
+        }
+
+        function closeAcceptConfirmModal() {
+            document.getElementById('acceptConfirmModal').classList.remove('active');
         }
 
         function closeConfirmModal() {
             document.getElementById('confirmModal').classList.remove('active');
         }
 
-        async function updateStatus(status) {
+        async function generateSelesai() {
             try {
+                const response = await fetch('/admin/pendaftaran/<%= data.id %>/generate-selesai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Surat Tanda Selesai berhasil dibuat', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin/surat';
+                    }, 1500);
+                } else {
+                    showToast('Gagal: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan', 'error');
+            }
+        }
+
+        async function updateStatus(status, divisiPenempatan) {
+            try {
+                const bodyData = { status };
+                if (divisiPenempatan) {
+                    bodyData.divisi_penempatan = divisiPenempatan;
+                }
+
                 const response = await fetch('/admin/pendaftaran/<%= data.id %>/status', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ status })
+                    body: JSON.stringify(bodyData)
                 });
 
                 const result = await response.json();
@@ -705,6 +1046,18 @@
         document.getElementById('confirmModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeConfirmModal();
+            }
+        });
+
+        document.getElementById('divisionModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeDivisionModal();
+            }
+        });
+
+        document.getElementById('acceptConfirmModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeAcceptConfirmModal();
             }
         });
     </script>
