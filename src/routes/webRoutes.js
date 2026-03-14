@@ -8,4 +8,7 @@ router.get('/', webController.index);
 // FAQ page
 router.get('/faq', webController.faq);
 
+// Program page
+router.get('/program', webController.program);
+
 module.exports = router;

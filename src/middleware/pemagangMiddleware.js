@@ -14,8 +14,8 @@ const isPemagang = async (req, res, next) => {
             [req.session.user.id]
         );
 
-        // If no pendaftaran or status is not 'diterima', block access
-        if (pendaftaran.length === 0 || pendaftaran[0].status !== 'diterima') {
+        // If no pendaftaran or status is not 'diterima' or 'selesai', block access
+        if (pendaftaran.length === 0 || (pendaftaran[0].status !== 'diterima' && pendaftaran[0].status !== 'selesai')) {
             return res.render('access-denied', {
                 title: 'Akses Ditolak - Infranexia',
                 message: 'Anda tidak memiliki akses ke halaman ini. Pastikan pendaftaran magang Anda sudah diterima.',

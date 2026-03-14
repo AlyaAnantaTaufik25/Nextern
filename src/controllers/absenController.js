@@ -6,33 +6,52 @@ exports.showAbsen = async (req, res) => {
     try {
         const userId = req.session.user.id;
 
-        // Get user data with pendaftaran info
-        const [users] = await db.query(`
-            SELECT u.*, p.bidang as divisi
-            FROM users u
-            LEFT JOIN pendaftaran p ON u.id = p.user_id
-            WHERE u.id = ?
-        `, [userId]);
-
-        if (users.length === 0) {
-            return res.redirect('/');
+        // Get pendaftaran info
+        const pendaftaranId = req.query.id;
+        let pendaftaran;
+        if (pendaftaranId) {
+            const [p] = await db.query('SELECT * FROM pendaftaran WHERE id = ? AND user_id = ?', [pendaftaranId, userId]);
+            pendaftaran = p.length > 0 ? p[0] : null;
+        } else {
+            const [p] = await db.query('SELECT * FROM pendaftaran WHERE user_id = ? ORDER BY created_at DESC LIMIT 1', [userId]);
+            pendaftaran = p.length > 0 ? p[0] : null;
         }
 
+        // Get latest registration for navigation logic
+        const [latestPendaftaran] = await db.query(
+            'SELECT id, status FROM pendaftaran WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+            [userId]
+        );
+        const pendaftaranStatus = latestPendaftaran.length > 0 ? latestPendaftaran[0].status : null;
+
+        // Is this a historical view?
+        const isHistory = pendaftaranId ? true : (pendaftaran && pendaftaran.status === 'selesai');
+
+        // Get user data
+        const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+        if (users.length === 0) return res.redirect('/auth/login');
         const user = users[0];
 
-        // Get attendance records for this user
-        const [absensi] = await db.query(`
-            SELECT *, DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal
-            FROM absensi 
-            WHERE user_id = ? 
-            ORDER BY tanggal DESC
-        `, [userId]);
+        // Get attendance records for this user - filter by period if pendaftaran exists
+        let absensiQuery = `SELECT *, DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal FROM absensi WHERE user_id = ?`;
+        let queryParams = [userId];
+
+        if (pendaftaran) {
+            absensiQuery += ` AND tanggal BETWEEN ? AND ?`;
+            queryParams.push(pendaftaran.waktu_mulai, pendaftaran.waktu_selesai);
+        }
+
+        absensiQuery += ` ORDER BY tanggal DESC`;
+        const [absensi] = await db.query(absensiQuery, queryParams);
 
         res.render('pemagang/absen/index', {
             title: 'Absensi - Infranexia',
             currentPage: 'absensi',
             user: user,
-            absensi: absensi
+            absensi: absensi,
+            pendaftaranStatus: pendaftaranStatus,
+            isHistory: isHistory,
+            pendaftaran: pendaftaran
         });
 
     } catch (error) {
@@ -60,6 +79,16 @@ exports.showCheckInForm = async (req, res) => {
         const isWorking = await isWorkingDay(today);
         const holidayInfo = await getHolidayInfo(today);
         const dayName = getIndonesianDayName(today);
+
+        // Get latest registration status
+        const [pendaftaran] = await db.query(
+            'SELECT status FROM pendaftaran WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+            [userId]
+        );
+
+        if (pendaftaran.length > 0 && pendaftaran[0].status === 'selesai') {
+            return res.redirect('/pemagang/absen');
+        }
 
         res.render('pemagang/absen/check-in', {
             title: 'Check-In Absensi - Infranexia',

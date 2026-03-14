@@ -712,6 +712,113 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        /* History Section */
+        .history-section {
+            margin-top: 40px;
+            margin-bottom: 50px;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .history-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+        }
+
+        .history-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border-color: #E31937;
+        }
+
+        .history-info h3 {
+            font-size: 18px;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .history-period {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            background: #f0f2f5;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .stat-badge svg {
+            color: #E31937;
+        }
+
+        .history-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .btn-download-small {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #fff;
+            border: 1.5px solid #E31937;
+            color: #E31937;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download-small:hover {
+            background: #E31937;
+            color: #fff;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pill.selesai { background: #d1fae5; color: #065f46; }
+        .status-pill.diterima { background: #dbeafe; color: #1e40af; }
+        .status-pill.ditolak { background: #fee2e2; color: #991b1b; }
+        .status-pill.verifikasi { background: #fef3c7; color: #92400e; }
+        .status-pill.formulir { background: #f3f4f6; color: #4b5563; }
     </style>
 </head>
 
@@ -745,10 +852,10 @@
                 </div>
                 <div class="dropdown-menu">
                     <a href="/profil" class="dropdown-item">Profil Saya</a>
-                    <% if (locals.pendaftaranStatus==='diterima' ) { %>
-                        <div class="dropdown-divider"></div>
-                        <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
-                        <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                        <% if (locals.pendaftaranStatus === 'diterima') { %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                            <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
                         <% } %>
                             <div class="dropdown-divider"></div>
                             <a href="/auth/logout" class="dropdown-item logout">Logout</a>
@@ -900,14 +1007,94 @@
                                         </div>
                             </div>
 
-                            <!-- Logout Button -->
-                            <a href="/auth/logout" class="btn-logout">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-                                </svg>
-                                Logout
-                            </a>
+                                <!-- History Section -->
+                                <% if (locals.riwayat && riwayat.length > 0) { %>
+                                <div class="history-section">
+                                    <h2 class="section-title" style="margin-bottom: 25px;">Riwayat Program Magang</h2>
+                                    <div class="history-grid">
+                                        <% riwayat.forEach(item => { %>
+                                            <div class="history-card">
+                                                <div class="history-info">
+                                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                                        <h3><%= item.divisi_penempatan || item.bidang || 'Program Magang' %></h3>
+                                                    </div>
+                                                    <div class="history-period">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                                        </svg>
+                                                        <%= moment(item.waktu_mulai).format('D MMMM YYYY') %> - <%= moment(item.waktu_selesai).format('D MMMM YYYY') %>
+                                                    </div>
+                                                    
+                                                    <% if (item.status === 'diterima' || item.status === 'selesai') { %>
+                                                    <div class="history-stats">
+                                                        <a href="/pemagang/logbook?id=<%= item.id %>" class="stat-badge" style="text-decoration: none; color: inherit; cursor: pointer;">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                                            </svg>
+                                                            <%= item.logbook_count %> Logbook
+                                                        </a>
+                                                        <a href="/pemagang/absen?id=<%= item.id %>" class="stat-badge" style="text-decoration: none; color: inherit; cursor: pointer;">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                            </svg>
+                                                            <%= item.absen_count %> Kehadiran
+                                                        </a>
+                                                    </div>
+                                                    <% } %>
+                                                </div>
+
+                                                <div class="history-actions">
+                                                    <% if (item.surat_balasan) { %>
+                                                        <a href="<%= item.surat_balasan %>" class="btn-download-small" target="_blank">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                                <polyline points="7 10 12 15 17 10"></polyline>
+                                                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                            </svg>
+                                                            Surat Balasan
+                                                        </a>
+                                                    <% } %>
+                                                    <% if (item.surat_selesai) { %>
+                                                        <a href="<%= item.surat_selesai %>" class="btn-download-small" target="_blank">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                                <polyline points="7 10 12 15 17 10"></polyline>
+                                                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                            </svg>
+                                                            Surat Selesai
+                                                        </a>
+                                                    <% } else if (item.status === 'selesai') { %>
+                                                        <span style="font-size: 11px; color: #888; background: #f0f2f5; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                <circle cx="12" cy="12" r="10"></circle>
+                                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                                            </svg>
+                                                            Tunggu Surat Selesai
+                                                        </span>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                                <% } %>
+
+                             <!-- Logout Button -->
+                             <a href="/auth/logout" class="btn-logout">
+                                 <svg viewBox="0 0 24 24" fill="currentColor">
+                                     <path
+                                         d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                                 </svg>
+                                 Logout
+                             </a>
         </div>
     </div>
 

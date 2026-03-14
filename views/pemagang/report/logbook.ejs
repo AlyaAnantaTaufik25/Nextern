@@ -258,7 +258,7 @@
         <div class="navbar-menu">
             <a href="/">Home</a>
             <a href="/program">Program</a>
-            <a href="/persyaratan">Persyaratan</a>
+            <a href="/#persyaratan">Persyaratan</a>
             <a href="/pendaftaran">Pendaftaran</a>
             <a href="/faq">FAQ</a>
         </div>
@@ -277,9 +277,13 @@
                 </div>
                 <div class="dropdown-menu">
                     <a href="/profil" class="dropdown-item">Profil Saya</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
-                    <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                    <% if (locals.pendaftaranStatus === 'diterima') { %>
+                        <% if (!locals.isHistory) { %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                            <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                        <% } %>
+                    <% } %>
                     <div class="dropdown-divider"></div>
                     <a href="/auth/logout" class="dropdown-item logout">Logout</a>
                 </div>
@@ -329,6 +333,7 @@
             </div>
             <% } %>
 
+            <% if (!locals.isHistory) { %>
             <a href="/pemagang/logbook/add" class="btn-add-log">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -337,6 +342,7 @@
                 </svg>
                 LogBook
             </a>
+            <% } %>
         </div>
 
         <div class="table-container">
@@ -347,7 +353,9 @@
                             <th class="no-col">No</th>
                             <th class="date-col">Tanggal</th>
                             <th>Kegiatan</th>
+                            <% if (!locals.isHistory) { %>
                             <th class="action-col">Aksi</th>
+                            <% } %>
                         </tr>
                     </thead>
                     <tbody>
@@ -368,6 +376,7 @@
                                     <td>
                                         <%= entry.kegiatan %>
                                     </td>
+                                    <% if (!locals.isHistory) { %>
                                     <td class="action-col">
                                         <div style="display: flex; gap: 10px; justify-content: center;">
                                             <a href="/pemagang/logbook/edit/<%= entry.id %>" class="btn-action btn-edit"
@@ -398,6 +407,7 @@
                                             </button>
                                         </div>
                                     </td>
+                                    <% } %>
                                 </tr>
                                 <% }); %>
                                     <% } else { %>
@@ -459,6 +469,16 @@
                     showToast('Terjadi kesalahan koneksi', 'error');
                 }
             }
+        }
+
+        // User menu dropdown toggle for mobile
+        const userMenu = document.querySelector('.user-menu');
+        if (userMenu) {
+            userMenu.addEventListener('click', function (e) {
+                if (window.innerWidth <= 768) {
+                    this.classList.toggle('active');
+                }
+            });
         }
     </script>
 </body>

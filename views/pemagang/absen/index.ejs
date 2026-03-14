@@ -219,7 +219,7 @@
         <div class="navbar-menu">
             <a href="/">Home</a>
             <a href="/program">Program</a>
-            <a href="/persyaratan">Persyaratan</a>
+            <a href="/#persyaratan">Persyaratan</a>
             <a href="/pendaftaran">Pendaftaran</a>
             <a href="/faq">FAQ</a>
         </div>
@@ -238,13 +238,15 @@
                 </div>
                 <div class="dropdown-menu">
                     <a href="/profil" class="dropdown-item">Profil Saya</a>
-                    <% if (locals.pendaftaranStatus==='diterima' ) { %>
-                        <div class="dropdown-divider"></div>
-                        <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
-                        <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
-                        <% } %>
+                    <% if (locals.pendaftaranStatus === 'diterima') { %>
+                        <% if (!locals.isHistory) { %>
                             <div class="dropdown-divider"></div>
-                            <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                            <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                            <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                        <% } %>
+                    <% } %>
+                    <div class="dropdown-divider"></div>
+                    <a href="/auth/logout" class="dropdown-item logout">Logout</a>
                 </div>
             </div>
             <% } %>
@@ -264,10 +266,12 @@
                     <span class="info-label">Perguruan Tinggi</span>: <%= user.institusi || '-' %>
                 </div>
             </div>
+            <% if (!locals.isHistory) { %>
             <a href="/pemagang/absen/check-in" class="btn-ambil"
                 style="text-decoration: none; display: block; text-align: center;">
                 + Ambil Absensi
             </a>
+            <% } %>
         </div>
 
         <!-- Attendance Table -->
@@ -312,7 +316,7 @@
                                     </td>
                                     <td>
                                         <% const today=new Date().toISOString().split('T')[0]; %>
-                                            <% if (item.status==='hadir' && !item.jam_pulang && item.tanggal===today) {
+                                            <% if (!locals.isHistory && item.status==='hadir' && !item.jam_pulang && item.tanggal===today) {
                                                 %>
                                                 <a href="/pemagang/absen/check-out" class="btn-pulang"
                                                     style="text-decoration: none; display: inline-block;">Absen

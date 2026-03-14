@@ -3,9 +3,17 @@ const PDFDocument = require('pdfkit');
 const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, HeadingLevel } = require('docx');
 
 // Helper: get internship dates for user
-async function getInternshipDates(userId) {
+async function getInternshipDates(userId, pendaftaranId = null) {
+    if (pendaftaranId) {
+        const [pendaftaran] = await db.query(
+            'SELECT id, status, waktu_mulai, waktu_selesai, nama_lengkap, instansi, jurusan, bidang FROM pendaftaran WHERE id = ? AND user_id = ?',
+            [pendaftaranId, userId]
+        );
+        return pendaftaran.length > 0 ? pendaftaran[0] : null;
+    }
+
     const [pendaftaran] = await db.query(
-        'SELECT waktu_mulai, waktu_selesai, nama_lengkap, instansi, jurusan, bidang FROM pendaftaran WHERE user_id = ? AND status = "diterima" ORDER BY created_at DESC LIMIT 1',
+        'SELECT id, status, waktu_mulai, waktu_selesai, nama_lengkap, instansi, jurusan, bidang FROM pendaftaran WHERE user_id = ? AND status IN ("diterima", "selesai") ORDER BY created_at DESC LIMIT 1',
         [userId]
     );
     return pendaftaran.length > 0 ? pendaftaran[0] : null;
@@ -28,21 +36,41 @@ exports.showLogbook = async (req, res) => {
         const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
 
         // Get internship dates
-        const pendaftaran = await getInternshipDates(userId);
+        const pendaftaranId = req.query.id;
+        const pendaftaran = await getInternshipDates(userId, pendaftaranId);
 
-        // Get logbook entries - use DATE_FORMAT to avoid timezone issues
-        const [entries] = await db.query(
-            `SELECT id, user_id, DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal, kegiatan, created_at 
-             FROM logbook WHERE user_id = ? ORDER BY tanggal ASC, id ASC`,
+        // Get latest registration for navigation logic
+        const [latestPendaftaran] = await db.query(
+            'SELECT id, status FROM pendaftaran WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
             [userId]
         );
+        const pendaftaranStatus = latestPendaftaran.length > 0 ? latestPendaftaran[0].status : null;
+
+        // Is this a historical view? (Viewing a non-latest pendaftaran OR latest is 'selesai' but we might be viewing details)
+        // More accurately: if we passed an explicit ID, we treat it as history for the sake of read-only UI
+        const isHistory = pendaftaranId ? true : (pendaftaran && pendaftaran.status === 'selesai');
+
+        // Get logbook entries - filter by dates if we have them
+        let entriesQuery = `SELECT id, user_id, DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal, kegiatan, created_at 
+                            FROM logbook WHERE user_id = ?`;
+        let queryParams = [userId];
+
+        if (pendaftaran) {
+            entriesQuery += ` AND tanggal BETWEEN ? AND ?`;
+            queryParams.push(pendaftaran.waktu_mulai, pendaftaran.waktu_selesai);
+        }
+
+        entriesQuery += ` ORDER BY tanggal ASC, id ASC`;
+        const [entries] = await db.query(entriesQuery, queryParams);
 
         res.render('pemagang/report/logbook', {
             title: 'Logbook - Infranexia',
             currentPage: 'logbook',
             user: users[0],
             entries: entries,
-            pendaftaran: pendaftaran
+            pendaftaran: pendaftaran,
+            pendaftaranStatus: pendaftaranStatus,
+            isHistory: isHistory
         });
 
     } catch (error) {
@@ -60,7 +88,7 @@ exports.showAddForm = async (req, res) => {
         // Get internship dates for date constraints
         const pendaftaran = await getInternshipDates(userId);
 
-        if (!pendaftaran) {
+        if (!pendaftaran || pendaftaran.status === 'selesai') {
             return res.redirect('/pemagang/logbook');
         }
 
@@ -91,10 +119,10 @@ exports.addEntry = async (req, res) => {
         // Get internship dates
         const pendaftaran = await getInternshipDates(userId);
 
-        if (!pendaftaran) {
+        if (!pendaftaran || pendaftaran.status === 'selesai') {
             return res.status(400).json({
                 success: false,
-                message: 'Anda belum memiliki pendaftaran magang yang diterima'
+                message: pendaftaran?.status === 'selesai' ? 'Magang sudah selesai, tidak dapat menambah logbook' : 'Anda belum memiliki pendaftaran magang yang diterima'
             });
         }
 

@@ -2,6 +2,7 @@
 const db = require('../confiq/database');
 const path = require('path');
 const fs = require('fs');
+const moment = require('moment');
 const { countWorkingDays } = require('../utils/dateHelper');
 
 // Show pendaftaran page
@@ -30,9 +31,27 @@ exports.showPendaftaran = async (req, res) => {
         let status = 'new'; // new, formulir, verifikasi, diterima, ditolak
         let pendaftaranData = null;
 
-        if (pendaftaran.length > 0) {
+        const isReRegistering = req.session.reRegister;
+        if (isReRegistering) {
+            delete req.session.reRegister; // Clear flag
+        }
+
+        if (pendaftaran.length > 0 && !isReRegistering) {
             pendaftaranData = pendaftaran[0];
             status = pendaftaranData.status;
+
+            // Fetch letters if any
+            const [suratBalasan] = await db.query(
+                'SELECT file_path FROM surat WHERE pendaftaran_id = ? AND tipe_surat = "balasan" LIMIT 1',
+                [pendaftaranData.id]
+            );
+            const [suratSelesai] = await db.query(
+                'SELECT file_path FROM surat WHERE pendaftaran_id = ? AND tipe_surat = "selesai" LIMIT 1',
+                [pendaftaranData.id]
+            );
+
+            pendaftaranData.surat_balasan = suratBalasan.length > 0 ? suratBalasan[0].file_path : null;
+            pendaftaranData.surat_selesai = suratSelesai.length > 0 ? suratSelesai[0].file_path : null;
         }
 
         res.render('pendaftaran', {
@@ -40,6 +59,7 @@ exports.showPendaftaran = async (req, res) => {
             currentPage: 'pendaftaran',
             user: user,
             status: status,
+            pendaftaranStatus: status, // Added for navbar consistency
             pendaftaran: pendaftaranData,
             quota: {
                 current: activeCount,
@@ -60,54 +80,94 @@ exports.submitPendaftaran = async (req, res) => {
         const userId = req.session.user.id;
         const { nama_lengkap, nim, instansi, bidang, jurusan, waktu_mulai, waktu_selesai } = req.body;
 
-        const maxQuota = 2;
-
-        // 1. Check Date Overlap Quota (Includes 'verifikasi' and 'diterima')
-        const [overlaps] = await db.query(
-            `SELECT COUNT(*) as count 
-             FROM pendaftaran 
-             WHERE status IN ('verifikasi', 'diterima') 
-             AND user_id != ? 
-             AND (
-                (waktu_mulai <= ? AND waktu_selesai >= ?) OR 
-                (waktu_mulai <= ? AND waktu_selesai >= ?) OR 
-                (? <= waktu_mulai AND ? >= waktu_selesai)
-             )`,
-            [userId, waktu_mulai, waktu_mulai, waktu_selesai, waktu_selesai, waktu_mulai, waktu_selesai]
-        );
-
-        const overlapCount = overlaps[0].count;
-
-        // If 2 or more people already occupy this period
-        if (overlapCount >= maxQuota) {
-            return res.status(403).send(`
+        // 0. Validate dates are not in the past
+        const today = moment().startOf('day');
+        const start = moment(waktu_mulai);
+        if (start.isBefore(today)) {
+            return res.status(400).send(`
                 <html>
                 <head>
-                    <title>Periode Penuh - Infranexia</title>
+                    <title>Error - Tanggal Tidak Valid</title>
                     <style>
-                        body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8fafc; }
-                        .error-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 500px; border: 1px solid #fee2e2; }
-                        .icon { font-size: 60px; margin-bottom: 20px; }
-                        h1 { color: #E31937; margin: 0 0 15px; font-size: 24px; }
-                        p { color: #64748b; line-height: 1.6; margin-bottom: 30px; }
-                        .dates { background: #fff1f2; padding: 15px; border-radius: 12px; color: #991b1b; font-weight: 600; margin-bottom: 30px; }
-                        a { background: #E31937; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; transition: 0.3s; }
-                        a:hover { background: #be123c; transform: translateY(-2px); }
+                        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5; }
+                        .error-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; max-width: 500px; }
+                        h1 { color: #E31937; margin-bottom: 20px; }
+                        p { color: #666; margin-bottom: 30px; }
+                        a { background: #E31937; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; }
+                        a:hover { background: #c41230; }
                     </style>
                 </head>
                 <body>
                     <div class="error-box">
-                        <div class="icon">📅</div>
-                        <h1>⚠️ Periode Penuh</h1>
-                        <p>Silakan pilih tanggal lain yang masih tersedia.</p>
-                        <div class="dates">
-                            ${waktu_mulai} s/d ${waktu_selesai}
-                        </div>
-                        <a href="/pendaftaran">Kembali dan Ubah Tanggal</a>
+                        <h1>⚠️ Tanggal Tidak Valid</h1>
+                        <p>Tanggal mulai tidak boleh di masa lalu.</p>
+                        <a href="/pendaftaran">Kembali ke Formulir</a>
                     </div>
                 </body>
                 </html>
             `);
+        }
+
+        const maxQuota = 15;
+
+        // 1. Check Daily Quota (Includes 'verifikasi' and 'diterima')
+        // We check every day in the requested range to ensure NO day exceeds 15 people
+        const [registeredDates] = await db.query(
+            `SELECT waktu_mulai, waktu_selesai 
+             FROM pendaftaran 
+             WHERE status IN ('verifikasi', 'diterima') 
+             AND user_id != ? 
+             AND NOT (waktu_selesai < ? OR waktu_mulai > ?)`,
+            [userId, waktu_mulai, waktu_selesai]
+        );
+
+        // Map overlapping registrations into daily counts
+        const dailyCounts = {};
+        const rangeStart = moment(waktu_mulai);
+        const rangeEnd = moment(waktu_selesai);
+
+        for (const reg of registeredDates) {
+            let current = moment.max(moment(reg.waktu_mulai), rangeStart);
+            const end = moment.min(moment(reg.waktu_selesai), rangeEnd);
+
+            while (current.isSameOrBefore(end)) {
+                const dateKey = current.format('YYYY-MM-DD');
+                dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+                
+                if (dailyCounts[dateKey] >= maxQuota) {
+                    return res.status(403).send(`
+                        <html>
+                        <head>
+                            <title>Periode Penuh - Infranexia</title>
+                            <style>
+                                body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8fafc; }
+                                .error-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 500px; border: 1px solid #fee2e2; }
+                                .icon { font-size: 60px; margin-bottom: 20px; }
+                                h1 { color: #E31937; margin: 0 0 15px; font-size: 24px; }
+                                p { color: #64748b; line-height: 1.6; margin-bottom: 30px; }
+                                .dates { background: #fff1f2; padding: 15px; border-radius: 12px; color: #991b1b; font-weight: 600; margin-bottom: 30px; }
+                                .full-date { background: #fee2e2; color: #991b1b; padding: 5px 10px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; display: inline-block; }
+                                a { background: #E31937; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; transition: 0.3s; }
+                                a:hover { background: #be123c; transform: translateY(-2px); }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="error-box">
+                                <div class="icon">📅</div>
+                                <h1>⚠️ Periode Penuh</h1>
+                                <p>Salah satu atau lebih hari dalam periode yang Anda pilih sudah mencapai batas maksimal (15 orang).</p>
+                                <div class="full-date">Tanggal Penuh: ${dateKey}</div>
+                                <div class="dates">
+                                    ${waktu_mulai} s/d ${waktu_selesai}
+                                </div>
+                                <a href="/pendaftaran">Kembali dan Ubah Tanggal</a>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                }
+                current.add(1, 'day');
+            }
         }
 
         // Validate duration - minimum 1 month (30 working days)
@@ -148,14 +208,17 @@ exports.submitPendaftaran = async (req, res) => {
             suratPengantar = '/uploads/surat/' + req.file.filename;
         }
 
-        // Check if user already has a pendaftaran
-        const [existingPendaftaran] = await db.query(
-            'SELECT id FROM pendaftaran WHERE user_id = ?',
+        // Check if user already has a pendaftaran and its status
+        const [latestPendaftaran] = await db.query(
+            'SELECT id, status FROM pendaftaran WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
             [userId]
         );
 
-        if (existingPendaftaran.length > 0) {
-            // Update existing
+        const shouldInsertNew = latestPendaftaran.length === 0 || 
+                                ['selesai', 'ditolak'].includes(latestPendaftaran[0].status);
+
+        if (!shouldInsertNew) {
+            // Update existing (for pending/verifikasi/diterima/formulir)
             await db.query(
                 `UPDATE pendaftaran SET 
                     nama_lengkap = ?,
@@ -167,11 +230,11 @@ exports.submitPendaftaran = async (req, res) => {
                     waktu_selesai = ?,
                     surat_pengantar = COALESCE(?, surat_pengantar),
                     status = 'verifikasi'
-                WHERE user_id = ? `,
-                [nama_lengkap, nim, instansi, bidang, jurusan, waktu_mulai, waktu_selesai, suratPengantar, userId]
+                WHERE id = ? `,
+                [nama_lengkap, nim, instansi, bidang, jurusan, waktu_mulai, waktu_selesai, suratPengantar, latestPendaftaran[0].id]
             );
         } else {
-            // Insert new
+            // Insert new record (for new user or re-registration after completion/rejection)
             await db.query(
                 `INSERT INTO pendaftaran(user_id, nama_lengkap, nim, instansi, bidang, jurusan, waktu_mulai, waktu_selesai, surat_pengantar, status) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, 'verifikasi')`,
@@ -197,25 +260,44 @@ exports.checkQuota = async (req, res) => {
             return res.json({ available: true });
         }
 
-        const maxQuota = 2;
+        const maxQuota = 15;
 
-        const [overlaps] = await db.query(
-            `SELECT COUNT(*) as count 
+        const [registeredDates] = await db.query(
+            `SELECT waktu_mulai, waktu_selesai 
              FROM pendaftaran 
              WHERE status IN ('verifikasi', 'diterima') 
              AND user_id != ? 
-             AND (
-                (waktu_mulai <= ? AND waktu_selesai >= ?) OR 
-                (waktu_mulai <= ? AND waktu_selesai >= ?) OR 
-                (? <= waktu_mulai AND ? >= waktu_selesai)
-             )`,
-            [userId, waktu_mulai, waktu_mulai, waktu_selesai, waktu_selesai, waktu_mulai, waktu_selesai]
+             AND NOT (waktu_selesai < ? OR waktu_mulai > ?)`,
+            [userId, waktu_mulai, waktu_selesai]
         );
 
-        const count = overlaps[0].count;
+        // Daily count mapping
+        const dailyCounts = {};
+        const rangeStart = moment(waktu_mulai);
+        const rangeEnd = moment(waktu_selesai);
+        let available = true;
+        let fullDate = null;
+
+        for (const reg of registeredDates) {
+            let current = moment.max(moment(reg.waktu_mulai), rangeStart);
+            const end = moment.min(moment(reg.waktu_selesai), rangeEnd);
+
+            while (current.isSameOrBefore(end)) {
+                const dateKey = current.format('YYYY-MM-DD');
+                dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+                if (dailyCounts[dateKey] >= maxQuota) {
+                    available = false;
+                    fullDate = dateKey;
+                    break;
+                }
+                current.add(1, 'day');
+            }
+            if (!available) break;
+        }
+
         res.json({
-            available: count < maxQuota,
-            count: count,
+            available: available,
+            fullDate: fullDate,
             max: maxQuota
         });
 
@@ -305,6 +387,17 @@ exports.downloadSuratSelesai = async (req, res) => {
         res.download(filePath);
     } catch (error) {
         console.error('Download surat selesai error:', error);
+        res.status(500).send('Terjadi kesalahan');
+    }
+};
+
+// Set a session flag to allow re-registration without losing history
+exports.daftarLagi = async (req, res) => {
+    try {
+        req.session.reRegister = true;
+        res.redirect('/pendaftaran');
+    } catch (error) {
+        console.error('Daftar lagi error:', error);
         res.status(500).send('Terjadi kesalahan');
     }
 };

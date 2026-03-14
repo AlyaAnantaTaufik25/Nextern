@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Program Magang Infranexia - PT Telkom Infrastruktur Indonesia. Daftar dan kembangkan karirmu bersama kami.">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .program-page-header {
+            background: linear-gradient(135deg, #E31937 0%, #b8152d 100%);
+            padding: 120px 0 60px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .program-page-title {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .program-page-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .program-details-section {
+            padding: 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .program-detail-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-detail-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #E31937;
+        }
+
+        .program-detail-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .program-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .program-name span {
+            color: #E31937;
+        }
+
+        .program-desc {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .program-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .program-features li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+            font-size: 15px;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .program-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #E31937;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .back-btn-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: transparent;
+            color: #E31937;
+            border: 2px solid #E31937;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background-color: #E31937;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="navbar-logo">
+            <a href="/">
+                <img src="/img/logotelkom.png" alt="Infranexia Logo">
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <a href="/#home" class="nav-link">Home</a>
+            <a href="/#our-program" class="nav-link">Program</a>
+            <a href="/#persyaratan" class="nav-link">Persyaratan</a>
+            <a href="/pendaftaran"
+                class="<%= typeof currentPage !== 'undefined' && currentPage === 'pendaftaran' ? 'active' : '' %>">Pendaftaran</a>
+            <a href="/faq"
+                class="<%= typeof currentPage !== 'undefined' && currentPage === 'faq' ? 'active' : '' %>">FAQ</a>
+        </div>
+        <% if (locals.isAuthenticated) { %>
+            <div class="user-menu">
+                <div class="user-menu-trigger">
+                    <div class="user-name-pill">
+                        <span>Halo, <%= user.nama_depan %></span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <img src="<%= user.foto_profil ? user.foto_profil : 'https://ui-avatars.com/api/?name=' + user.nama_depan + '+' + (user.nama_belakang || '') + '&size=40&background=E31937&color=fff&bold=true' %>"
+                        alt="Profile" class="user-avatar">
+                </div>
+                <div class="dropdown-menu">
+                    <a href="/profil" class="dropdown-item">Profil Saya</a>
+                    <% if (locals.pendaftaranStatus==='diterima' ) { %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
+                        <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
+                    <% } %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                </div>
+            </div>
+            <% } else { %>
+                <a href="/auth/login?mode=register" class="btn-daftar">Daftar</a>
+                <% } %>
+                    <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="program-page-header">
+        <div class="container">
+            <h1 class="program-page-title">Program Magang Infranexia</h1>
+            <p class="program-page-subtitle">Pilih peran dan asah kemampuanmu dalam lingkungan kerja telekomunikasi nyata bersama para ahli.</p>
+        </div>
+    </header>
+
+    <!-- Details Section -->
+    <section class="program-details-section">
+        
+        <div class="program-detail-card">
+            <h2 class="program-name">AOM <span>(Account Operation Manager)</span></h2>
+            <p class="program-desc">
+                Posisi ini berfokus pada manajemen akun dan operasional secara end-to-end. Kamu akan belajar mengelola operasional akun pelanggan korporasi serta memastikan standar kualitas layanan infrastruktur tetap prima dan memenuhi SLA.
+            </p>
+            <ul class="program-features">
+                <li>Berinteraksi langsung dengan klien korporasi dan memahami kebutuhan infrastruktur mereka.</li>
+                <li>Monitoring dan reporting performa layanan untuk menjaga kepuasan pelanggan.</li>
+                <li>Belajar alur koordinasi antar tim internal untuk penyelesaian masalah pelanggan.</li>
+                <li>Mendapatkan wawasan bisnis dan teknis dalam manajemen akun telekomunikasi.</li>
+            </ul>
+        </div>
+
+        <div class="program-detail-card">
+            <h2 class="program-name">ASO <span>(Access Support Operation)</span></h2>
+            <p class="program-desc">
+                Peran yang sangat dinamis untuk mereka yang tertarik dengan aspek lapangan dan teknis. Menangani dukungan teknis operasional akses jaringan langsung di infrastruktur yang sesungguhnya.
+            </p>
+            <ul class="program-features">
+                <li>Terlibat dalam proses instalasi, pemeliharaan, dan optimalisasi infrastruktur jaringan di lapangan.</li>
+                <li>Belajar langsung penggunaan perangkat uji dan alat ukur transmisi optik/akses.</li>
+                <li>Melakukan perbaikan gangguan (troubleshooting) secara efisien dan cepat.</li>
+                <li>Meningkatkan kemampuan pemecahan teknis terkait arsitektur jaringan akses.</li>
+            </ul>
+        </div>
+
+        <div class="program-detail-card">
+            <h2 class="program-name">NOC <span>(Network Operation Center)</span></h2>
+            <p class="program-desc">
+                Jantung dari operasional telekomunikasi. Memonitor dan mengelola performa jaringan secara real-time dari pusat komando untuk memastikan keandalan layanan aktif selama 24 jam penuh.
+            </p>
+            <ul class="program-features">
+                <li>Pengawasan proaktif infrastruktur jaringan menggunakan perangkat monitoring canggih.</li>
+                <li>Identifikasi dan eskalasi dini anomali jaringan sebelum berdampak luas pada pelanggan (first level maintenance).</li>
+                <li>Menganalisis pola trafik data, penggunaan alarm, dan sistem korelasi jaringan.</li>
+                <li>Berkesempatan menguasai platform monitoring skala enterprise secara nyata.</li>
+            </ul>
+        </div>
+
+        <div class="back-btn-container">
+            <a href="/#our-program" class="btn-back">← Kembali ke Program</a>
+        </div>
+    </section>
+
+    <!-- Footer Divider -->
+    <div class="footer-divider"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Infranexia - PT Telkom Infrastruktur Indonesia. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // Navbar stickiness (always active since we're not on hero)
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 10) {
+                navbar.classList.add('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navbarMenu = document.querySelector('.navbar-menu');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function () {
+                navbarMenu.classList.toggle('active');
+            });
+        }
+
+        // User menu dropdown toggle for mobile
+        const userMenu = document.querySelector('.user-menu');
+        if (userMenu) {
+            userMenu.addEventListener('click', function (e) {
+                if (window.innerWidth <= 768) {
+                    this.classList.toggle('active');
+                }
+            });
+        }
+    </script>
+</body>
+
+<%- include('partials/logout-modal') %>
+<%- include('partials/toast-notification') %>
+
+</html>

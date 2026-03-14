@@ -14,9 +14,9 @@ exports.faq = (req, res) => {
     });
 };
 
-exports.faq = (req, res) => {
-    res.render('faq', {
-        title: 'FAQ - Infranexia',
-        currentPage: 'faq'
+exports.program = (req, res) => {
+    res.render('program', {
+        title: 'Program - Infranexia',
+        currentPage: 'program'
     });
 };

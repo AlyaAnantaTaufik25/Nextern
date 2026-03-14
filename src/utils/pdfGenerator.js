@@ -66,7 +66,7 @@ async function generateAcceptanceLetter(data) {
             currentY = doc.y + 35;
 
             // Body Paragraph 1
-            doc.font('Helvetica').fontSize(10).text(`Menindaklanjuti Surat No. 353/UN16.15.3.2/HM.01.01/2025 tanggal 08 Oktober 2025 perihal Surat Permohonan Kerja Praktek Mahasiswa sebagai berikut :`, margin, currentY, {
+            doc.font('Helvetica').fontSize(10).text(`Menindaklanjuti Surat No. ${data.no_surat_pemohon || '-'} tanggal ${data.tgl_surat_pemohon || '-'} perihal ${data.perihal_pemohon || '-'} sebagai berikut :`, margin, currentY, {
                 align: 'justify',
                 lineGap: 3,
                 width: contentWidth
@@ -140,10 +140,15 @@ async function generateAcceptanceLetter(data) {
             currentY += 35;
             doc.text('Hormat Kami,', margin, currentY);
 
-            currentY += 55;
+            const signaturePath = path.join(__dirname, '../../public/img/ttd.png');
+            if (fs.existsSync(signaturePath)) {
+                doc.image(signaturePath, margin, currentY + 2, { width: 100 });
+            }
+
+            currentY += 70;
 
             doc.font('Helvetica-Bold').text('AGUS FRIADI, M.M', margin, currentY, { underline: true });
-            doc.font('Helvetica').fontSize(9).text('HEAD OF TELKOM INFRASTRUKTUR INDONESIA AREA SUMBAR & JAMBI', margin, currentY + 12);
+            doc.font('Helvetica').fontSize(9).text('HEAD OF TELKOM INFRASTRUKTUR INDONESIA AREA SUMBAR & JAMBI', margin, currentY + 14);
 
             // --- HD VECTOR FOOTER ---
             const footerY = doc.page.height - 100;
@@ -246,10 +251,10 @@ async function generateCompletionLetter(data) {
             
             currentY += 25;
             doc.text('Nama', margin, currentY);
-            doc.text(`: ${data.manager_name || '...........................................'}`, margin + 70, currentY);
+            doc.text(`: ${data.manager_name || '........................................'}`, margin + 70, currentY);
             currentY += 18;
             doc.text('Jabatan', margin, currentY);
-            doc.text(`: ${data.manager_role || '...........................................'}`, margin + 70, currentY);
+            doc.text(`: ${data.manager_role || '........................................'}`, margin + 70, currentY);
 
             currentY += 35;
             doc.text('Dengan ini menerangkan bahwa:', margin, currentY);
@@ -261,8 +266,8 @@ async function generateCompletionLetter(data) {
             doc.font('Helvetica').text('Asal', margin, currentY);
             doc.text(`: ${data.intern_origin}`, margin + 70, currentY);
             currentY += 18;
-            doc.text('NIM / ID Pemagang', margin, currentY);
-            doc.text(`: ${data.intern_id}`, margin + 110, currentY);
+            doc.text('NIM', margin, currentY);
+            doc.text(`: ${data.intern_id}`, margin + 70, currentY);
 
             currentY += 35;
             doc.font('Helvetica').text(`telah menyelesaikan kegiatan magang kerja atau praktik kerja lapangan (PKL) di perusahaan kami selama ${data.days} hari kerja sejak tanggal ${data.startDate} sampai dengan ${data.endDate}.`, margin, currentY, {
@@ -281,22 +286,20 @@ async function generateCompletionLetter(data) {
             currentY = doc.y + 20;
             doc.text('Demikian, surat keterangan ini kami buat agar dipergunakan semestinya.', margin, currentY);
 
-            currentY = doc.y + 60;
+            currentY = doc.y + 40;
             doc.text(`Padang, ${data.date || moment().format('D MMMM YYYY')}`, margin, currentY);
-            doc.text('Hormat Kami,', margin, currentY + 18);
+            currentY += 18;
+            doc.text('Hormat Kami,', margin, currentY);
 
-            currentY += 60;
-            // Logo overlay for signature area
-            const signLogoPath = path.join(__dirname, '../../public/img/logotelkom.png');
-            if (fs.existsSync(signLogoPath)) {
-                // Subtle logo in background of signature
-                // doc.image(signLogoPath, margin + 20, currentY - 30, { width: 120, opacity: 0.8 });
+            const signaturePath = path.join(__dirname, '../../public/img/ttd.png');
+            if (fs.existsSync(signaturePath)) {
+                doc.image(signaturePath, margin, currentY + 2, { width: 100 });
             }
 
-            currentY += 20;
-            doc.font('Helvetica-Bold').text(data.manager_name ? data.manager_name.toUpperCase() : '( .......................................... )', margin, currentY, { underline: !!data.manager_name });
-            doc.font('Helvetica').fontSize(10).text(data.manager_role ? data.manager_role.toUpperCase() : '', margin, currentY + 15);
-            doc.text('PT TELKOM INFRASTRUKTUR INDONESIA', margin, currentY + 28);
+            currentY += 70;
+            doc.font('Helvetica-Bold').text(data.manager_name || '........................................', margin, currentY, { underline: true });
+            doc.font('Helvetica').fontSize(10).text(data.manager_role || '........................................', margin, currentY + 14);
+            doc.text('PT TELKOM INFRASTRUKTUR INDONESIA', margin, currentY + 27);
 
             // --- HD VECTOR FOOTER ---
             const footerY = doc.page.height - 100;

@@ -45,5 +45,6 @@ router.post('/check-quota', isAuthenticated, pendaftaranController.checkQuota);
 router.get('/status', isAuthenticated, pendaftaranController.getPendaftaranStatus);
 router.get('/download-surat', isAuthenticated, pendaftaranController.downloadSurat);
 router.get('/download-surat-selesai', isAuthenticated, pendaftaranController.downloadSuratSelesai);
+router.get('/daftar-lagi', isAuthenticated, pendaftaranController.daftarLagi);
 
 module.exports = router;

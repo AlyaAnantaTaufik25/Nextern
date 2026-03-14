@@ -1,6 +1,8 @@
 const db = require('../confiq/database');
 const path = require('path');
+const fs = require('fs');
 const { generateAcceptanceLetter, generateCompletionLetter } = require('../utils/pdfGenerator');
+const { extractLetterDetails } = require('../utils/letterExtractor');
 const moment = require('moment');
 require('moment/locale/id');
 moment.locale('id');
@@ -158,8 +160,19 @@ exports.pendaftaranDetail = async (req, res) => {
             return res.status(404).send('Pendaftaran tidak ditemukan');
         }
 
+        const data = pendaftaran[0];
+
+        // Automated Extraction for Student Letter Details
+        let extractedDetails = { no_surat: '', tanggal: '', perihal: 'Permohonan Kerja Praktek Mahasiswa' };
+        if (data.surat_pengantar && data.surat_pengantar.toLowerCase().endsWith('.pdf')) {
+            const absolutePath = path.join(__dirname, '../../public', data.surat_pengantar);
+            if (fs.existsSync(absolutePath)) {
+                extractedDetails = await extractLetterDetails(absolutePath);
+            }
+        }
+
         let hasSelesaiLetter = false;
-        if (pendaftaran[0].status === 'selesai') {
+        if (data.status === 'selesai') {
             const [surat] = await db.query(`SELECT id FROM surat WHERE pendaftaran_id = ? AND tipe_surat = 'selesai' LIMIT 1`, [id]);
             hasSelesaiLetter = surat.length > 0;
         }
@@ -167,12 +180,13 @@ exports.pendaftaranDetail = async (req, res) => {
         res.render('admin/pendaftaran-detail', {
             title: 'Detail Pendaftaran - Infranexia',
             currentPage: 'pendaftaran',
-            data: pendaftaran[0],
+            data: data,
+            extractedDetails: extractedDetails,
             hasSelesaiLetter
         });
     } catch (error) {
         console.error('Admin pendaftaran detail error:', error);
-        res.status(500).send('Terjadi kesalahan');
+        res.status(500).send(`Terjadi kesalahan: ${error.message}`); // Show error for debugging
     }
 };
 
@@ -180,10 +194,19 @@ exports.pendaftaranDetail = async (req, res) => {
 exports.updateStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status, divisi_penempatan } = req.body;
+        const { status, divisi_penempatan, no_surat_pemohon, tgl_surat_pemohon, perihal_pemohon } = req.body;
 
         if (status === 'diterima' && divisi_penempatan) {
-            await db.query('UPDATE pendaftaran SET status = ?, divisi_penempatan = ? WHERE id = ?', [status, divisi_penempatan, id]);
+            await db.query(`
+                UPDATE pendaftaran SET 
+                    status = ?, 
+                    divisi_penempatan = ?,
+                    no_surat_pemohon = ?,
+                    tgl_surat_pemohon = ?,
+                    perihal_pemohon = ?
+                WHERE id = ?`, 
+                [status, divisi_penempatan, no_surat_pemohon || null, tgl_surat_pemohon || null, perihal_pemohon || null, id]
+            );
         } else {
             await db.query('UPDATE pendaftaran SET status = ? WHERE id = ?', [status, id]);
         }
@@ -202,7 +225,7 @@ exports.updateStatus = async (req, res) => {
             // Generate letter number
             const year = moment().format('YYYY');
             const month = moment().format('MM');
-            const [maxSeq] = await db.query(`SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ? AND (tipe_surat = 'balasan' OR tipe_surat IS NULL)`, [year]);
+            const [maxSeq] = await db.query(`SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ?`, [year]);
             const nextSeq = (maxSeq[0].maxS || 0) + 1;
             const seqStr = String(nextSeq).padStart(3, '0');
             const noSurat = `Tel. 11.${seqStr}/TIF/${month}/${year}`;
@@ -215,8 +238,11 @@ exports.updateStatus = async (req, res) => {
                 recipient_dept: p.instansi,
                 instansi: p.instansi,
                 subject: `Persetujuan Melaksanakan Kerja Praktek Mahasiswa ${p.jurusan} ${p.instansi}`,
+                no_surat_pemohon: p.no_surat_pemohon,
+                tgl_surat_pemohon: p.tgl_surat_pemohon ? moment(p.tgl_surat_pemohon).format('DD MMMM YYYY') : '-',
+                perihal_pemohon: p.perihal_pemohon,
                 students: [{
-                    nama: p.nama_lengkap,
+                    nama: `${p.nama_depan} ${p.nama_belakang || ''}`.trim(),
                     nim: p.nim || '-',
                     prodi: p.jurusan
                 }],
@@ -228,8 +254,8 @@ exports.updateStatus = async (req, res) => {
 
             // Save to surat table
             await db.query(`
-                INSERT INTO surat (no_surat, sequence, user_id, pendaftaran_id, file_path, perihal, target_nama)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO surat (no_surat, sequence, user_id, pendaftaran_id, file_path, perihal, target_nama, tipe_surat)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'balasan')
             `, [noSurat, nextSeq, p.user_id, id, filePathRelative, pdfData.subject, pdfData.recipient_name]);
         }
 
@@ -472,11 +498,15 @@ exports.generateCompletionLetter = async (req, res) => {
         const year = moment().format('YYYY');
         const month = moment().format('MM');
         
-        // Count existing selesai letters for the current year to get the sequence
-        const [maxSeq] = await db.query('SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ? AND tipe_surat = ?', [year, 'selesai']);
+        // Count existing selesai letters to get the sequential number (01, 02, 03...)
+        const [selesaiCount] = await db.query("SELECT COUNT(*) as cnt FROM surat WHERE tipe_surat = 'selesai'");
+        const selesaiSeq = (selesaiCount[0].cnt || 0) + 1;
+        const seqStr = String(selesaiSeq).padStart(2, '0');
+        const noSurat = `09.${seqStr}/TIF/${month}/${year}`;
+
+        // Also get global max sequence for the surat table
+        const [maxSeq] = await db.query('SELECT MAX(sequence) as maxS FROM surat WHERE YEAR(created_at) = ?', [year]);
         const nextSeq = (maxSeq[0].maxS || 0) + 1;
-        const seqStr = String(nextSeq).padStart(2, '0');
-        const noSurat = `${seqStr}.03/TIF/${month}/${year}`;
 
         // Calculate working days (approximate or precise if dateHelper is used)
         // For now using the simple subtraction from dashboard logic
@@ -488,7 +518,7 @@ exports.generateCompletionLetter = async (req, res) => {
         const pdfData = {
             no_surat: noSurat,
             date: moment().format('D MMMM YYYY'),
-            intern_name: p.nama_lengkap,
+            intern_name: `${p.nama_depan} ${p.nama_belakang || ''}`.trim(),
             intern_origin: p.instansi,
             intern_id: p.nim || '-',
             days: durasiHari,
@@ -501,10 +531,11 @@ exports.generateCompletionLetter = async (req, res) => {
         const filePathRelative = await generateCompletionLetter(pdfData);
 
         // Save to surat table with tipe_surat = 'selesai'
+        const internName = `${p.nama_depan} ${p.nama_belakang || ''}`.trim();
         await db.query(`
             INSERT INTO surat (no_surat, sequence, user_id, pendaftaran_id, file_path, perihal, target_nama, tipe_surat)
             VALUES (?, ?, ?, ?, ?, ?, ?, 'selesai')
-        `, [noSurat, nextSeq, p.user_id, id, filePathRelative, `Surat Keterangan Selesai Magang - ${p.nama_lengkap}`, p.nama_lengkap]);
+        `, [noSurat, nextSeq, p.user_id, id, filePathRelative, `Surat Keterangan Selesai Magang - ${internName}`, internName]);
 
         res.json({ success: true, message: 'Surat Tanda Selesai berhasil dibuat' });
     } catch (error) {

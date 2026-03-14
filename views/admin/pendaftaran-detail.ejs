@@ -302,7 +302,6 @@
 
         .btn-accept:hover {
             background: #218838;
-            transform: translateY(-2px);
         }
 
         .btn-reject {
@@ -322,7 +321,6 @@
         .btn-reject:hover {
             background: #dc3545;
             color: white;
-            transform: translateY(-2px);
         }
 
         .status-display {
@@ -719,7 +717,7 @@
             </header>
 
             <!-- Content -->
-            <div class="content">
+            <div class="content" style="padding: 20px 40px;">
                 <div style="width: 100%;">
                     <a href="/admin/pendaftaran" class="back-link">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -729,337 +727,202 @@
                         Kembali ke Daftar
                     </a>
 
-                    <div class="detail-card">
-                        <div class="detail-header">
-                            <h2>Informasi Pendaftar</h2>
-                        </div>
-                        <div class="detail-body">
-                            <div class="form-row">
-                                <span class="form-label">Nama</span>
-                                <span class="form-value">
-                                    <%= data.nama_depan %>
-                                        <%= data.nama_belakang || '' %>
-                                </span>
+                    <% const isVerification = (data.status === 'verifikasi' || data.status === 'pending'); %>
+
+                    <div style="<%= isVerification ? 'display: grid; grid-template-columns: 1fr 450px; gap: 20px; align-items: start;' : 'max-width: 900px; margin: 0 auto;' %>">
+                        
+                        <% if (isVerification) { %>
+                            <!-- Left: PDF Viewer (Only during verification) -->
+                            <div class="detail-card" style="height: calc(100vh - 180px); display: flex; flex-direction: column;">
+                                <div class="detail-header" style="background: #f8f9fa; padding: 15px;">
+                                    <h2 style="font-size: 18px;"><i class="bi bi-file-earmark-pdf-fill" style="color: #E31937;"></i> Pratinjau Surat Pemohon</h2>
+                                </div>
+                                <div style="flex: 1; background: #525659;">
+                                    <% if (data.surat_pengantar) { %>
+                                        <iframe src="<%= data.surat_pengantar %>" style="width: 100%; height: 100%; border: none;"></iframe>
+                                    <% } else { %>
+                                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #999;">
+                                            <i class="bi bi-file-earmark-x" style="font-size: 60px;"></i>
+                                            <p>Surat tidak tersedia</p>
+                                        </div>
+                                    <% } %>
+                                </div>
                             </div>
-                            <div class="form-row">
-                                <span class="form-label">Email</span>
-                                <span class="form-value">
-                                    <%= data.email %>
-                                </span>
+                        <% } %>
+
+                        <!-- Right/Main: Form & Details -->
+                        <div class="detail-card" style="<%= isVerification ? 'max-height: calc(100vh - 180px); overflow-y: auto;' : 'padding-bottom: 30px;' %>">
+                            <div class="detail-header">
+                                <h2><%= isVerification ? 'Detail & Verifikasi' : 'Detail Pendaftaran' %></h2>
                             </div>
-                            <div class="form-row">
-                                <span class="form-label">NIM</span>
-                                <span class="form-value">
-                                    <%= data.nim || '-' %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Tanggal Mendaftar</span>
-                                <span class="form-value">
-                                    <%= new Date(data.created_at).toLocaleDateString('id-ID', { day: '2-digit' ,
-                                        month: 'long' , year: 'numeric' }) %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Instansi</span>
-                                <span class="form-value">
-                                    <%= data.instansi || data.institusi || '-' %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Bidang</span>
-                                <span class="form-value">
-                                    <%= data.bidang || '-' %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Jurusan</span>
-                                <span class="form-value">
-                                    <%= data.jurusan || '-' %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Durasi Magang</span>
-                                <span class="form-value">
-                                    <% if (data.waktu_mulai && data.waktu_selesai) { const start=new
-                                        Date(data.waktu_mulai); const end=new Date(data.waktu_selesai); const
-                                        diffDays=Math.ceil((end - start) / (1000 * 60 * 60 * 24)); %>
-                                        <%= diffDays %> Hari
+                            <div class="detail-body" style="padding: 25px;">
+                                <!-- Status Badge -->
+                                <div style="margin-bottom: 25px; text-align: center;">
+                                    <span class="status-badge status-<%= data.status %>" style="font-size: 14px; padding: 8px 35px; border-radius: 50px;">
+                                        STATUS: <%= data.status.toUpperCase() %>
+                                    </span>
+                                </div>
+
+                                <div class="form-row" style="margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
+                                    <span class="form-label" style="width: 150px; color: #666;">Nama Lengkap</span>
+                                    <span style="font-weight: 600; color: #1a1a1a; font-size: 15px;"><%= data.nama_depan %> <%= data.nama_belakang || '' %></span>
+                                </div>
+
+                                <div class="form-row" style="margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
+                                    <span class="form-label" style="width: 150px; color: #666;">Instansi/Sekolah</span>
+                                    <span style="font-size: 15px;"><%= data.instansi || data.institusi || '-' %></span>
+                                </div>
+
+                                <% if (isVerification) { %>
+                                    <!-- Verification Form Logic -->
+                                    <form id="approvalForm" style="margin-top: 25px; background: #fffcfc; border: 1px solid #ffebeb; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(227, 25, 55, 0.05);">
+
+
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 700; color: #999; margin-bottom: 8px; text-transform: uppercase;">DIVISI PENEMPATAN</label>
+                                            <select id="divisi_penempatan" class="form-value highlight" style="width: 100%; height: 45px;">
+                                                <option value="" disabled selected>Pilih Divisi</option>
+                                                <option value="Account Operation Maintenance" <%= data.bidang === 'Account Operation Maintenance' ? 'selected' : '' %>>Account Operation Maintenance</option>
+                                                <option value="Access Support Operation" <%= data.bidang === 'Access Support Operation' ? 'selected' : '' %>>Access Support Operation</option>
+                                                <option value="Network Operation Center" <%= data.bidang === 'Network Operation Center' ? 'selected' : '' %>>Network Operation Center</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 700; color: #999; margin-bottom: 8px; text-transform: uppercase;">NOMOR SURAT PEMOHON</label>
+                                            <input type="text" id="no_surat_pemohon" class="form-value highlight" value="<%= locals.extractedDetails ? extractedDetails.no_surat : '' %>" style="width: 100%; height: 45px;">
+                                        </div>
+
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 700; color: #999; margin-bottom: 8px; text-transform: uppercase;">TANGGAL SURAT PEMOHON</label>
+                                            <input type="text" id="tgl_surat_pemohon" class="form-value highlight" value="<%= locals.extractedDetails ? extractedDetails.tanggal : '' %>" placeholder="Contoh: 08 Oktober 2025" style="width: 100%; height: 45px;">
+                                        </div>
+
+                                        <div class="form-group" style="margin-bottom: 20px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 700; color: #999; margin-bottom: 8px; text-transform: uppercase;">PERIHAL SURAT</label>
+                                            <input type="text" id="perihal_pemohon" class="form-value highlight" value="<%= locals.extractedDetails ? extractedDetails.perihal : 'Permohonan Kerja Praktek Mahasiswa' %>" style="width: 100%; height: 45px;">
+                                        </div>
+
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                            <button type="button" onclick="handleSubmit('diterima')" class="btn-accept" style="padding: 14px; width: 100%; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 1px;">TERIMA</button>
+                                            <button type="button" onclick="handleSubmit('ditolak')" class="btn-reject" style="padding: 14px; width: 100%; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 1px;">TOLAK</button>
+                                        </div>
+                                    </form>
+                                <% } else { %>
+                                    <!-- Full Detail Content for other statuses -->
+                                    <% if (data.status === 'selesai') { %>
+                                        <div style="margin: 25px 0; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; background: #f8fafc; border: 1px solid #e2e8f0; width: 100%;">
+                                            <% if (locals.hasSelesaiLetter) { %>
+                                                <div style="color: #15803d; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; background: #f0fdf4; padding: 12px; border-radius: 8px; border: 1px solid #dcfce7; width: 100%;">
+                                                    <i class="bi bi-patch-check-fill" style="font-size: 18px;"></i>
+                                                    Surat Selesai Tersedia
+                                                </div>
                                             <% } else { %>
-                                                -
-                                                <% } %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Periode Magang</span>
-                                <span class="form-value highlight">
-                                    <% if (data.waktu_mulai && data.waktu_selesai) { %>
-                                        <%= new Date(data.waktu_mulai).toLocaleDateString('id-ID', { day: '2-digit' ,
-                                            month: '2-digit' , year: '2-digit' }) %> - <%= new
-                                                Date(data.waktu_selesai).toLocaleDateString('id-ID', { day: '2-digit' ,
-                                                month: '2-digit' , year: '2-digit' }) %>
-                                                <% } else { %>
-                                                    -
-                                                    <% } %>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <span class="form-label">Surat Pengantar</span>
-                                <% if (data.surat_pengantar) { %>
-                                    <a href="<%= data.surat_pengantar %>" target="_blank" class="btn-surat">LIHAT
-                                        SURAT</a>
-                                    <% } else { %>
-                                        <span class="form-value">Tidak ada</span>
-                                        <% } %>
-                            </div>
-                        </div>
-                        <div class="detail-footer">
-                            <% if (data.status==='verifikasi' ) { %>
-                                <button class="btn-accept" onclick="showConfirm('diterima')">TERIMA PENDAFTARAN</button>
-                                <button class="btn-reject" onclick="showConfirm('ditolak')">TOLAK</button>
-                                <% } else if (data.status==='selesai') { %>
-                                    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center;">
-                                        <div class="status-display status-selesai" style="width: auto;">
-                                            Status: <%= data.status.toUpperCase() %>
+                                                <button onclick="generateSelesai()" style="background: #3b82f6; border: none; color: white; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); width: 100%;">
+                                                    <i class="bi bi-file-earmark-plus"></i>
+                                                    Buat Surat Selesai
+                                                </button>
+                                            <% } %>
                                         </div>
-                                        <% if (locals.hasSelesaiLetter) { %>
-                                            <div class="status-display" style="background: #28a745; color: white; width: auto; font-size: 14px; padding: 10px 20px;">
-                                                <i class="bi bi-check-circle-fill" style="margin-right: 5px;"></i>
-                                                Surat Tanda Selesai Telah Dibuat
+                                    <% } %>
+
+                                    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 30px;">
+                                        <h4 style="font-size: 14px; color: #1a1a1a; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Informasi Lengkap Pendaftaran</h4>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; background: #fbfbfb; padding: 25px; border-radius: 12px;">
+                                            <div class="info-row">
+                                                <span style="display: block; font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">NIM/ID Siswa</span>
+                                                <span style="font-size: 14px; font-weight: 500;"><%= data.nim || '-' %></span>
                                             </div>
-                                        <% } else { %>
-                                            <button class="btn-generate" onclick="generateSelesai()">
-                                                <i class="bi bi-file-earmark-check-fill"></i>
-                                                Generate Surat Tanda Selesai
-                                            </button>
-                                        <% } %>
-                                    </div>
-                                    <% } else { %>
-                                        <div class="status-display status-<%= data.status %>">
-                                            Status: <%= data.status.toUpperCase() %>
+                                            <div class="info-row">
+                                                <span style="display: block; font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">Program Studi</span>
+                                                <span style="font-size: 14px; font-weight: 500;"><%= data.jurusan || '-' %></span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span style="display: block; font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">Bidang Diminati</span>
+                                                <span style="font-size: 14px; font-weight: 500;"><%= data.bidang || '-' %></span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span style="display: block; font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">Durasi Magang</span>
+                                                <span style="font-size: 14px; font-weight: 500;">
+                                                    <%= new Date(data.waktu_mulai).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %> - 
+                                                    <%= new Date(data.waktu_selesai).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %>
+                                                </span>
+                                            </div>
+                                            <% if (data.surat_pengantar) { %>
+                                                <div class="info-row" style="grid-column: span 2; margin-top: 10px;">
+                                                    <a href="<%= data.surat_pengantar %>" target="_blank" class="btn-surat" style="width: 100%; text-align: center; border-radius: 8px;">
+                                                        <i class="bi bi-file-earmark-pdf"></i> Lihat File Surat Pengantar
+                                                    </a>
+                                                </div>
+                                            <% } %>
                                         </div>
-                                        <% } %>
+                                    </div>
+                                <% } %>
+                            </div>
                         </div>
-                        <style>
-                            .btn-generate {
-                                background: #16a34a;
-                                color: white;
-                                padding: 16px 40px;
-                                border: none;
-                                border-radius: 8px;
-                                font-size: 14px;
-                                font-weight: 600;
-                                cursor: pointer;
-                                transition: all 0.2s ease;
-                                display: flex;
-                                align-items: center;
-                                gap: 10px;
-                            }
-                            .btn-generate:hover {
-                                background: #15803d;
-                                transform: translateY(-2px);
-                            }
-                            .btn-generate i {
-                                font-size: 18px;
-                            }
-                        </style>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Confirmation Modal (for reject) -->
-    <div class="modal-overlay" id="confirmModal">
-        <div class="confirm-modal">
-            <h3>Anda Yakin</h3>
-            <div class="confirm-icon">?</div>
-            <div class="confirm-buttons">
-                <button class="btn-yes" id="confirmYes">YA</button>
-                <button class="btn-back" onclick="closeConfirmModal()">KEMBALI</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Division Selection Modal -->
-    <div class="modal-overlay" id="divisionModal">
-        <div class="division-modal-card">
-            <div class="division-modal-body">
-                <h3>Pilih divisi yang akan ditempatkan...</h3>
-                <div class="division-list">
-                    <div class="division-option">
-                        <input type="radio" name="divisi_detail" id="divisiDetail1" value="Account Operation Maintenance">
-                        <label for="divisiDetail1">Account Operation Maintenance</label>
-                    </div>
-                    <div class="division-option">
-                        <input type="radio" name="divisi_detail" id="divisiDetail2" value="Access Support Operation">
-                        <label for="divisiDetail2">Access Support Operation</label>
-                    </div>
-                    <div class="division-option">
-                        <input type="radio" name="divisi_detail" id="divisiDetail3" value="Network Operation Center">
-                        <label for="divisiDetail3">Network Operation Center</label>
-                    </div>
-                </div>
-                <div class="division-buttons">
-                    <button class="btn-pilih" onclick="selectDivision()">PILIH</button>
-                    <button class="btn-kembali" onclick="closeDivisionModal()">KEMBALI</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Accept Confirmation Modal -->
-    <div class="modal-overlay" id="acceptConfirmModal">
-        <div class="accept-confirm-card">
-            <div class="accept-confirm-body">
-                <h3>Anda Yakin Menerima:</h3>
-                <div class="accept-confirm-info">
-                    <p>Nama: <span id="confirmNama"></span></p>
-                    <p>Durasi magang: <span id="confirmDurasi"></span></p>
-                    <p>Divisi ditempatkan: <span id="confirmDivisi"></span></p>
-                </div>
-                <div class="division-buttons">
-                    <button class="btn-pilih" id="acceptYes">YA</button>
-                    <button class="btn-kembali" onclick="closeAcceptConfirmModal()">KEMBALI</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let currentAction = null;
-        let selectedDivisi = null;
+        async function handleSubmit(status) {
+            const id = '<%= data.id %>';
+            const divisi = document.getElementById('divisi_penempatan')?.value;
+            const noSurat = document.getElementById('no_surat_pemohon')?.value;
+            const tglSurat = document.getElementById('tgl_surat_pemohon')?.value;
+            const perihal = document.getElementById('perihal_pemohon')?.value;
 
-        // Calculate duration for confirmation display
-        <% 
-            let durasiHari = '-';
-            if (data.waktu_mulai && data.waktu_selesai) {
-                const s = new Date(data.waktu_mulai);
-                const e = new Date(data.waktu_selesai);
-                durasiHari = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+            if (status === 'diterima') {
+                if (!divisi) return showToast('Pilih divisi terlebih dahulu', 'error');
+                if (!noSurat) return showToast('Nomor surat tidak boleh kosong', 'error');
             }
-        %>
 
-        function showConfirm(action) {
-            currentAction = action;
-            if (action === 'diterima') {
-                // Show division selection modal first
-                selectedDivisi = null;
-                document.querySelectorAll('input[name="divisi_detail"]').forEach(r => r.checked = false);
-                document.getElementById('divisionModal').classList.add('active');
-            } else {
-                // For reject, show the old confirmation modal
-                document.getElementById('confirmModal').classList.add('active');
-                document.getElementById('confirmYes').onclick = function () {
-                    updateStatus(action);
-                };
+            try {
+                const response = await fetch(`/admin/pendaftaran/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status,
+                        divisi_penempatan: divisi,
+                        no_surat_pemohon: noSurat,
+                        tgl_surat_pemohon: tglSurat,
+                        perihal_pemohon: perihal
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Status berhasil diperbarui', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(result.message || 'Gagal memperbarui status', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan', 'error');
             }
-        }
-
-        function closeDivisionModal() {
-            document.getElementById('divisionModal').classList.remove('active');
-        }
-
-        function selectDivision() {
-            const selected = document.querySelector('input[name="divisi_detail"]:checked');
-            if (!selected) {
-                showToast('Silakan pilih divisi terlebih dahulu', 'error');
-                return;
-            }
-            selectedDivisi = selected.value;
-            closeDivisionModal();
-
-            // Show accept confirmation modal with details
-            document.getElementById('confirmNama').textContent = '<%= data.nama_depan %> <%= data.nama_belakang || "" %>';
-            document.getElementById('confirmDurasi').textContent = '<%= durasiHari %> Hari';
-            document.getElementById('confirmDivisi').textContent = selectedDivisi;
-
-            document.getElementById('acceptConfirmModal').classList.add('active');
-            document.getElementById('acceptYes').onclick = function () {
-                updateStatus('diterima', selectedDivisi);
-            };
-        }
-
-        function closeAcceptConfirmModal() {
-            document.getElementById('acceptConfirmModal').classList.remove('active');
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').classList.remove('active');
         }
 
         async function generateSelesai() {
+            const id = '<%= data.id %>';
             try {
-                const response = await fetch('/admin/pendaftaran/<%= data.id %>/generate-selesai', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                const response = await fetch(`/admin/pendaftaran/${id}/generate-selesai`, {
+                    method: 'POST'
                 });
-
                 const result = await response.json();
-
                 if (result.success) {
                     showToast('Surat Tanda Selesai berhasil dibuat', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/admin/surat';
-                    }, 1500);
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    showToast('Gagal: ' + result.message, 'error');
+                    showToast(result.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showToast('Terjadi kesalahan', 'error');
+                showToast('Terjadi kesalahan server', 'error');
             }
         }
-
-        async function updateStatus(status, divisiPenempatan) {
-            try {
-                const bodyData = { status };
-                if (divisiPenempatan) {
-                    bodyData.divisi_penempatan = divisiPenempatan;
-                }
-
-                const response = await fetch('/admin/pendaftaran/<%= data.id %>/status', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(bodyData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Status berhasil diperbarui', 'success');
-                    location.reload();
-                } else {
-                    showToast('Gagal memperbarui status', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Terjadi kesalahan', 'error');
-            }
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('confirmModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeConfirmModal();
-            }
-        });
-
-        document.getElementById('divisionModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeDivisionModal();
-            }
-        });
-
-        document.getElementById('acceptConfirmModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeAcceptConfirmModal();
-            }
-        });
     </script>
 </body>
 

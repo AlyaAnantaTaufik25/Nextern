@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const db = require('../confiq/database');
 const fs = require('fs');
 const path = require('path');
+const moment = require('moment');
+require('moment/locale/id');
+moment.locale('id');
 
 // Show profile page
 exports.showProfile = async (req, res) => {
@@ -14,22 +17,33 @@ exports.showProfile = async (req, res) => {
         const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
         const user = users[0];
 
-        // Get pendaftaran data
-        const [pendaftaran] = await db.query(
-            'SELECT * FROM pendaftaran WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+        // Get pendaftaran history with documents and stats
+        const [riwayat] = await db.query(
+            `SELECT p.*, 
+                (SELECT COUNT(*) FROM logbook l WHERE l.user_id = p.user_id AND l.tanggal BETWEEN p.waktu_mulai AND p.waktu_selesai) as logbook_count,
+                (SELECT COUNT(*) FROM absensi a WHERE a.user_id = p.user_id AND a.tanggal BETWEEN p.waktu_mulai AND p.waktu_selesai) as absen_count,
+                (SELECT file_path FROM surat s WHERE s.pendaftaran_id = p.id AND s.tipe_surat = 'balasan' LIMIT 1) as surat_balasan,
+                (SELECT file_path FROM surat s WHERE s.pendaftaran_id = p.id AND s.tipe_surat = 'selesai' LIMIT 1) as surat_selesai
+             FROM pendaftaran p 
+             WHERE p.user_id = ? 
+             ORDER BY p.created_at DESC`,
             [userId]
         );
 
+        const currentPendaftaran = riwayat.length > 0 ? riwayat[0] : null;
+
         const view = role === 'admin' ? 'admin/profil' : 'profil';
-        const currentPage = role === 'admin' ? '' : 'profil'; // For admin sidebar highlighting if needed, or none
+        const currentPage = role === 'admin' ? '' : 'profil';
 
         res.render(view, {
             title: 'Profil - Infranexia',
             user: user,
-            pendaftaran: pendaftaran.length > 0 ? pendaftaran[0] : null,
-            currentPage: currentPage, // Pass currentPage
+            pendaftaran: currentPendaftaran,
+            riwayat: riwayat,
+            currentPage: currentPage,
             success: req.query.success || null,
-            error: req.query.error || null
+            error: req.query.error || null,
+            moment: moment // Pass moment for date formatting in view if needed
         });
 
     } catch (error) {

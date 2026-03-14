@@ -262,7 +262,6 @@
 
         .btn-submit:hover {
             background: #c41230;
-            transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(227, 25, 55, 0.3);
         }
 
@@ -344,7 +343,6 @@
 
         .btn-download:hover {
             background: #218838;
-            transform: translateY(-2px);
         }
 
         .result-info-link {
@@ -531,13 +529,13 @@
                     </div>
                     <div class="dropdown-menu">
                         <a href="/profil" class="dropdown-item">Profil Saya</a>
-                        <% if (locals.pendaftaranStatus==='diterima' ) { %>
+                        <% if (locals.pendaftaranStatus === 'diterima') { %>
                             <div class="dropdown-divider"></div>
                             <a href="/pemagang/absen" class="dropdown-item">Absensi</a>
                             <a href="/pemagang/logbook" class="dropdown-item">Logbook</a>
-                            <% } %>
-                                <div class="dropdown-divider"></div>
-                                <a href="/auth/logout" class="dropdown-item logout">Logout</a>
+                        <% } %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/auth/logout" class="dropdown-item logout">Logout</a>
                     </div>
                 </div>
                 <% } %>
@@ -615,10 +613,10 @@
                                 ⚠️ Minimal durasi magang adalah 1 bulan
                             </div>
                             <!-- Real-time Quota Warning -->
-                            <div id="quotaWarning"
-                                style="color: #E31937; background: #fff1f2; padding: 10px; border-radius: 8px; border: 1px solid #fee2e2; font-size: 13px; margin-top: 8px; display: none;">
-                                ⚠️ <b>Periode Penuh:</b> Silakan pilih tanggal lain yang masih tersedia.
-                            </div>
+                            <div class="durasi-info" id="quotaWarning" style="display: none; background: #fff1f2; color: #e11d48; border-color: #fda4af;">
+                                    ⚠️ Periode Penuh: Salah satu atau lebih hari dalam jangka waktu yang Anda pilih sudah mencapai batas maksimal (15 orang).
+                                    <div id="fullDateDetail" style="font-size: 13px; margin-top: 5px; font-weight: 600;"></div>
+                                </div>
                         </div>
 
                         <div class="form-group">
@@ -691,39 +689,73 @@
                             <% } else if (status==='ditolak' ) { %>
                                 <!-- Step 3: Hasil Ditolak -->
                                 <div class="result-content">
-                                    <h2 class="result-title">Mohon maaf</h2>
-                                    <p class="result-subtitle">Anda dinyatakan tidak lulus seleksi program
-                                        magang</p>
-
-                                    <p class="result-download-text">Silakan unduh surat berikut</p>
-
-                                    <a href="/pendaftaran/download-surat" class="btn-download">
-                                        Unduh
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                    <div style="margin-bottom: 25px;">
+                                        <svg width="80" height="80" viewBox="0 0 24 24" fill="#E31937">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                                         </svg>
-                                    </a>
+                                    </div>
+                                    <h2 class="result-title">Mohon maaf</h2>
+                                    <p class="result-subtitle">Anda dinyatakan tidak lulus seleksi program magang</p>
+                                    
+                                    <div style="border-top: 1px solid #eee; padding-top: 30px; margin-top: 30px;">
+                                        <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
+                                            Jangan berkecil hati, Anda masih dapat mencoba mendaftar kembali atau memilih periode lainnya.
+                                        </p>
+                                        <a href="/pendaftaran/daftar-lagi" class="btn-submit" style="display: inline-block; text-decoration: none; margin: 0; background: #E31937; padding: 14px 40px;">
+                                            Daftar Magang Lagi
+                                        </a>
+                                    </div>
 
-                                    <a href="/program" class="result-info-link">Informasi lebih lanjut →</a>
+                                    <a href="/" class="result-info-link" style="margin-top: 25px;">Kembali ke Beranda →</a>
                                 </div>
                                 <% } else if (status === 'selesai') { %>
                                     <!-- Step 3: Hasil Selesai -->
                                     <div class="result-content">
-                                        <h2 class="result-title">Selamat!</h2>
+                                        <h2 class="result-title">Selamat! 🎉</h2>
                                         <p class="result-subtitle" style="margin-bottom: 15px;">Anda telah menyelesaikan program magang di PT Telkom Infrastruktur Indonesia</p>
                                         
                                         <div style="margin: 20px 0;">
-                                            <i class="bi bi-patch-check-fill" style="font-size: 70px; color: #28a745;"></i>
+                                            <svg width="80" height="80" viewBox="0 0 24 24" fill="#28a745">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                            </svg>
                                         </div>
 
-                                        <p class="result-download-text" style="margin-bottom: 15px;">Silakan unduh Surat Tanda Selesai Magang Anda</p>
+                                        <p class="result-download-text" style="margin-bottom: 15px;">Unduh surat-surat Anda di bawah ini</p>
 
-                                        <a href="/pendaftaran/download-surat-selesai" class="btn-download">
-                                            Unduh Surat Tanda Selesai
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                                            </svg>
-                                        </a>
+                                        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
+                                            <% if (pendaftaran.surat_balasan) { %>
+                                                <a href="<%= pendaftaran.surat_balasan %>" class="btn-download" target="_blank">
+                                                    Unduh Surat Balasan
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                                    </svg>
+                                                </a>
+                                            <% } %>
+                                            
+                                            <% if (pendaftaran.surat_selesai) { %>
+                                                <a href="<%= pendaftaran.surat_selesai %>" class="btn-download" style="background: #007bff;" target="_blank">
+                                                    Unduh Surat Tanda Selesai
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                                    </svg>
+                                                </a>
+                                            <% } else { %>
+                                                <div style="background: #f8f9fa; border: 1px dashed #dee2e6; color: #6c757d; padding: 12px 30px; border-radius: 8px; font-size: 14px; display: inline-flex; align-items: center; gap: 10px;">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                                    </svg>
+                                                    Menunggu Surat Tanda Selesai
+                                                </div>
+                                            <% } %>
+                                        </div>
+
+                                        <div style="border-top: 1px solid #eee; padding-top: 30px; margin-top: 10px;">
+                                            <p style="color: #555; font-size: 15px; margin-bottom: 15px;">Ingin mendaftar magang lagi?</p>
+                                            <a href="/pendaftaran/daftar-lagi" class="btn-submit" style="display: inline-block; text-decoration: none; margin: 0; background: #E31937;">
+                                                Daftar Magang Lagi
+                                            </a>
+                                        </div>
 
                                         <a href="/" class="result-info-link" style="margin-top: 25px;">Kembali ke Beranda →</a>
                                     </div>
@@ -743,6 +775,18 @@
         const waktuSelesai = document.getElementById('waktuSelesai');
         const durasiError = document.getElementById('durasiError');
         const quotaWarning = document.getElementById('quotaWarning');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        if (waktuMulai) waktuMulai.setAttribute('min', today);
+        if (waktuSelesai) waktuSelesai.setAttribute('min', today);
+
+        // Update waktuSelesai min based on waktuMulai
+        waktuMulai?.addEventListener('change', function() {
+            if (this.value) {
+                waktuSelesai.setAttribute('min', this.value);
+            }
+        });
 
         // Mobile menu toggle
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -781,6 +825,10 @@
 
                     if (!data.available) {
                         quotaWarning.style.display = 'block';
+                        const fullDateDetail = document.getElementById('fullDateDetail');
+                        if (fullDateDetail && data.fullDate) {
+                            fullDateDetail.innerText = `Tanggal Penuh: ${data.fullDate}`;
+                        }
                         btnSubmit.disabled = true;
                         btnSubmit.style.opacity = '0.5';
                         btnSubmit.style.cursor = 'not-allowed';

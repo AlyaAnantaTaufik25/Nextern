@@ -1066,16 +1066,35 @@
 
     <!-- Accept Confirmation Modal -->
     <div class="modal-overlay" id="acceptConfirmModal">
-        <div class="accept-confirm-card">
+        <div class="accept-confirm-card" style="max-width: 600px;">
             <div class="accept-confirm-body">
-                <h3>Anda Yakin Menerima:</h3>
+                <h3>Terima Pendaftaran</h3>
                 <div class="accept-confirm-info">
                     <p>Nama: <span id="confirmNama"></span></p>
                     <p>Durasi magang: <span id="confirmDurasi"></span></p>
                     <p>Divisi ditempatkan: <span id="confirmDivisi"></span></p>
                 </div>
-                <div class="division-buttons">
-                    <button class="btn-pilih" id="acceptYes">YA</button>
+                
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="font-size: 14px; font-weight: 700; color: #E31937; margin-bottom: 15px;">
+                        <i class="bi bi-info-circle-fill"></i> Sesuaikan dengan surat yang diupload pendaftar:
+                    </p>
+                    <div class="form-row" style="margin-bottom: 15px;">
+                        <label class="form-label" style="width: 140px;">Nomor Surat</label>
+                        <input type="text" id="noSuratPemohon" class="form-value" placeholder="Contoh: 353/UN16.15.3.2/HM.01.01/2025" style="background: white;">
+                    </div>
+                    <div class="form-row" style="margin-bottom: 15px;">
+                        <label class="form-label" style="width: 140px;">Tanggal Surat</label>
+                        <input type="date" id="tglSuratPemohon" class="form-value" style="background: white;">
+                    </div>
+                    <div class="form-row" style="margin-bottom: 15px;">
+                        <label class="form-label" style="width: 140px;">Perihal</label>
+                        <input type="text" id="perihalPemohon" class="form-value" value="Permohonan Kerja Praktek Mahasiswa" style="background: white;">
+                    </div>
+                </div>
+
+                <div class="division-buttons" style="margin-top: 30px;">
+                    <button class="btn-pilih" id="acceptYes">TERIMA & BUAT SURAT</button>
                     <button class="btn-kembali" onclick="closeAcceptConfirmModal()">KEMBALI</button>
                 </div>
             </div>
@@ -1208,9 +1227,27 @@
             document.getElementById('confirmDurasi').textContent = data.durasi;
             document.getElementById('confirmDivisi').textContent = selectedDivisi;
 
+            // Reset/Pre-fill fields
+            document.getElementById('noSuratPemohon').value = '';
+            document.getElementById('tglSuratPemohon').value = '';
+            document.getElementById('perihalPemohon').value = 'Permohonan Kerja Praktek Mahasiswa';
+
             document.getElementById('acceptConfirmModal').classList.add('active');
             document.getElementById('acceptYes').onclick = function () {
-                updateStatus(currentPendaftaranId, 'diterima', selectedDivisi);
+                const noSuratPemohon = document.getElementById('noSuratPemohon').value;
+                const tglSuratPemohon = document.getElementById('tglSuratPemohon').value;
+                const perihalPemohon = document.getElementById('perihalPemohon').value;
+
+                if (!noSuratPemohon || !tglSuratPemohon || !perihalPemohon) {
+                    showToast('Harap isi semua informasi surat pemohon', 'error');
+                    return;
+                }
+
+                updateStatus(currentPendaftaranId, 'diterima', selectedDivisi, {
+                    no_surat_pemohon: noSuratPemohon,
+                    tgl_surat_pemohon: tglSuratPemohon,
+                    perihal_pemohon: perihalPemohon
+                });
             };
         }
 
@@ -1222,9 +1259,12 @@
             document.getElementById('confirmModal').classList.remove('active');
         }
 
-        async function updateStatus(id, status, divisiPenempatan) {
+        async function updateStatus(id, status, divisiPenempatan, extraData = {}) {
             try {
-                const bodyData = { status };
+                const bodyData = { 
+                    status, 
+                    ...extraData 
+                };
                 if (divisiPenempatan) {
                     bodyData.divisi_penempatan = divisiPenempatan;
                 }
